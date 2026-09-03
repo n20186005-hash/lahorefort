@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="180" viewBox="0 0 640 180" role="img" aria-label="قلعہ لاہور سیاحتی رہنما">
+<rect width="640" height="180" rx="28" fill="#f5ead2"/>
+<g transform="translate(30 20)" fill="none" stroke="#6d281d" stroke-width="8" stroke-linejoin="round">
+<path d="M15 130V58h28V38h24v20h25V38h24v20h28v72H15Z" fill="#9c3c2e"/>
+<path d="M50 130V92c0-18 13-32 31-32s31 14 31 32v38" fill="#f5ead2"/>
+<path d="M25 58V31l14-12 14 12v27M106 58V31l14-12 14 12v27"/>
+<circle cx="39" cy="37" r="5" fill="#d9a441" stroke="none"/><circle cx="120" cy="37" r="5" fill="#d9a441" stroke="none"/>
+</g>
+<text x="600" y="78" text-anchor="end" direction="rtl" font-family="Noto Nastaliq Urdu, Noto Naskh Arabic, serif" font-size="42" font-weight="700" fill="#4d2019">قلعہ لاہور</text>
+<text x="600" y="126" text-anchor="end" direction="rtl" font-family="Noto Naskh Arabic, serif" font-size="22" fill="#785b45">آزاد سیاحتی رہنما • لاہور، پنجاب</text>
+</svg>

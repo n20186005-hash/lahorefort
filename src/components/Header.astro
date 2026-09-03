@@ -1,0 +1,12 @@
+---
+const home = Astro.url.pathname === '/';
+---
+<header class="site-header">
+  <a class="brand" href="/" aria-label="قلعہ لاہور سیاحتی رہنما کا مرکزی صفحہ"><img src="/logo.svg" alt="قلعہ لاہور سیاحتی رہنما" width="250" height="70" /></a>
+  <nav aria-label="مرکزی نیویگیشن">
+    <a href={home ? '#تعارف' : '/#تعارف'}>تعارف</a>
+    <a href={home ? '#دورہ' : '/#دورہ'}>دورے کی منصوبہ بندی</a>
+    <a href={home ? '#نقشہ' : '/#نقشہ'}>نقشہ</a>
+    <a href={home ? '#سوالات' : '/#سوالات'}>عام سوالات</a>
+  </nav>
+</header>
