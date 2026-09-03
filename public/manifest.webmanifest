@@ -1,0 +1,20 @@
+{
+  "name": "قلعہ لاہور | Lahore Fort — اردو سیاحتی رہنما",
+  "short_name": "قلعہ لاہور",
+  "description": "قلعہ لاہور (Lahore Fort) کے لیے اردو سیاحتی رہنما: تاریخ، فنِ تعمیر، نقشہ، اوقات اور عملی معلومات۔",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#fffaf0",
+  "theme_color": "#6d281d",
+  "lang": "ur",
+  "dir": "rtl",
+  "categories": ["travel", "education"],
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

@@ -1,0 +1,92 @@
+<!-- Weather panel: current conditions + 7-day forecast from the free
+     Open-Meteo API (no key, non-profit friendly). The site is fully static
+     (Cloudflare Static Assets), so data is fetched in the browser and cached
+     locally for 30 minutes; a fallback message is shown on failure.
+     Coordinates: Lahore Fort (31.5883, 74.3129). -->
+<div class="wx" id="wx-root" dir="rtl">
+  <div class="wx-now wx-loading" id="wx-now"><span>موسم کی معلومات لوڈ ہو رہی ہیں…</span></div>
+  <div class="wx-days" id="wx-days" aria-live="polite"></div>
+  <p class="fine">اعداد و شمار مفت خدمت <a href="https://open-meteo.com/" target="_blank" rel="noopener" dir="ltr">open-meteo.com</a> سے فی الوقت حاصل ہوتے ہیں؛ درجۂ حرارت ڈگری سینٹی گریڈ میں ہے اور پیش گوئی وقت کے ساتھ بدل سکتی ہے۔</p>
+</div>
+<script is:inline>
+(function () {
+  var LAT = 31.5883;
+  var LON = 74.3129;
+  var KEY = 'lahoreFortWeatherV1';
+  var URL = 'https://api.open-meteo.com/v1/forecast?latitude=' + LAT + '&longitude=' + LON +
+    '&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m' +
+    '&daily=weather_code,temperature_2m_max,temperature_2m_min' +
+    '&timezone=Asia%2FKarachi&forecast_days=7';
+  var FD = '۰۱۲۳۴۵۶۷۸۹';
+  var WD = ['اتوار', 'پیر', 'منگل', 'بدھ', 'جمعرات', 'جمعہ', 'ہفتہ'];
+  var W = {
+    '0': 'صاف', '1': 'زیادہ تر صاف', '2': 'جزوی ابر آلود', '3': 'ابر آلود',
+    '45': 'دھند', '48': 'برفانی دھند',
+    '51': 'ہلکی بوندا باندی', '53': 'بوندا باندی', '55': 'تیز بوندا باندی',
+    '56': 'جمتی ہلکی بوندا باندی', '57': 'جمتی تیز بوندا باندی',
+    '61': 'ہلکی بارش', '63': 'بارش', '65': 'تیز بارش',
+    '66': 'جمتی ہلکی بارش', '67': 'جمتی تیز بارش',
+    '71': 'ہلکی برفباری', '73': 'برفباری', '75': 'تیز برفباری', '77': 'برف کے دانے',
+    '80': 'ہلکی بارش کے جھلکے', '81': 'بارش کے جھلکے', '82': 'تیز بارش کے جھلکے',
+    '85': 'برفانی جھلکے', '86': 'تیز برفانی جھلکے',
+    '95': 'گرج چمک', '96': 'گرج چمک کے ساتھ ژالہ', '99': 'شدید گرج چمک اور ژالہ'
+  };
+  function fa(n) { return String(n).replace(/\d/g, function (d) { return FD[+d]; }); }
+  function r0(x) { return Math.round(x); }
+  function wdesc(c) { return W[c] || 'مختلف موسم'; }
+  function weekdayOf(iso) {
+    var p = String(iso).split('-');
+    if (p.length < 3) { return ''; }
+    return WD[new Date(Date.UTC(+p[0], +p[1] - 1, +p[2])).getUTCDay()];
+  }
+  function render(d) {
+    var now = document.getElementById('wx-now');
+    var days = document.getElementById('wx-days');
+    if (!now || !days || !d || !d.current || !d.daily) { return fail(); }
+    var c = d.current;
+    now.className = 'wx-now';
+    now.innerHTML =
+      '<span class="wx-temp">' + fa(r0(c.temperature_2m)) + '°C</span>' +
+      '<div class="wx-meta"><strong>' + wdesc(c.weather_code) + '</strong>' +
+      '<span>محسوس: ' + fa(r0(c.apparent_temperature)) + '°C • نمی: ' + fa(r0(c.relative_humidity_2m)) + '٪</span>' +
+      '<span>ہوا: ' + fa(r0(c.wind_speed_10m)) + ' کلومیٹر فی گھنٹہ</span></div>';
+    var t = d.daily.time || [];
+    var wc = d.daily.weather_code || [];
+    var mx = d.daily.temperature_2m_max || [];
+    var mn = d.daily.temperature_2m_min || [];
+    var html = '';
+    for (var i = 0; i < t.length; i++) {
+      var label = i === 0 ? 'آج' : (i === 1 ? 'کل' : weekdayOf(t[i]));
+      html += '<div class="wx-day"><span class="d">' + label + '</span>' +
+        '<span class="wdesc">' + wdesc(wc[i]) + '</span>' +
+        '<span class="hi">' + fa(r0(mx[i])) + '°</span> <span class="lo">' + fa(r0(mn[i])) + '°</span></div>';
+    }
+    days.innerHTML = html;
+  }
+  function fail() {
+    var now = document.getElementById('wx-now');
+    var days = document.getElementById('wx-days');
+    if (now) {
+      now.className = 'wx-now';
+      now.innerHTML = '<span class="wx-error">اس وقت موسم کی معلومات دستیاب نہیں ہیں۔ براہِ کرم تھوڑی دیر بعد دوبارہ کوشش کریں یا مقامی موسمی اطلاع دیکھیں۔</span>';
+    }
+    if (days) { days.innerHTML = ''; }
+  }
+  try {
+    var raw = localStorage.getItem(KEY);
+    if (raw) {
+      var cache = JSON.parse(raw);
+      if (cache && cache.ts && cache.data && Date.now() - cache.ts < 30 * 60 * 1000) {
+        render(cache.data);
+        return;
+      }
+    }
+  } catch (e) { /* ignore storage errors */ }
+  fetch(URL).then(function (r) { if (!r.ok) { throw new Error('http'); } return r.json(); })
+    .then(function (data) {
+      try { localStorage.setItem(KEY, JSON.stringify({ ts: Date.now(), data: data })); } catch (e) { /* ignore */ }
+      render(data);
+    })
+    .catch(fail);
+})();
+</script>

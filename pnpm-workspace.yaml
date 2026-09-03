@@ -1,0 +1,7 @@
+# pnpm 11 project-level settings.
+# pnpm v11 no longer reads the "pnpm" field in package.json; project
+# settings live here. It also replaced onlyBuiltDependencies with the
+# allowBuilds map. esbuild must be allowed to run its postinstall build
+# script, otherwise `pnpm install` aborts with ERR_PNPM_IGNORED_BUILDS.
+allowBuilds:
+  esbuild: true

@@ -2,16 +2,20 @@
 
 Astro + Tailwind CSS + TypeScript پر مبنی RTL اردو سائٹ، Cloudflare Worker static assets deployment کے لیے تیار۔
 
-## واحد ڈومین ترتیب
-`SITE_URL` ماحول متغیر Astro کے `site` فیلڈ کا واحد ماخذ ہے۔ اگر خالی ہو تو build چلتا ہے، sitemap integration شامل نہیں ہوتی اور canonical/absolute Open Graph URL omit ہو جاتے ہیں۔
+## ڈومین اور تعیناتی
+مستقل ڈومین `https://lahorefort.org` ہے (astro.config.mjs میں ڈیفالٹ؛ CI/پری پروڈکشن کے لیے اسے `SITE_URL` ماحول متغیر سے override کیا جا سکتا ہے)۔ `site` ہمیشہ متعین رہتا ہے، اس لیے sitemap، canonical اور absolute Open Graph URLs خودکار پیدا ہوتے ہیں۔
 
 ```bash
-export SITE_URL=https://your-real-domain.pk
 corepack enable
 CI=1 corepack pnpm install --frozen-lockfile
 pnpm check
 pnpm build
+pnpm deploy   # wrangler static assets
 ```
+
+## PWA
+- `public/manifest.webmanifest` + `public/sw.js` (navigation network-first، آف لائن میں کیچ شدہ ہوم پیج) + `public/icons/icon-192.png`/`icon-512.png`۔
+- Service worker صرف HTTPS پر رجسٹر ہوتا ہے۔
 
 ## اہم راستے
 - `/` مرکزی واحد صفحہ
