@@ -81,11 +81,11 @@ ok('OH-6', 'plus code + address visible', home.includes('H8Q7+56P') && home.incl
 // ---------- E-E-A-T ----------
 console.log('\n[E-E-A-T]');
 const srcAll = srcFiles.map(read).join('\n');
-ok('EE-1', 'Footer: independent non-profit disclosure', read('src/components/Footer.astro').includes('آزاد، غیر منافع بخش'));
-ok('EE-2', 'Footer: authorities compared listed', read('src/components/Footer.astro').includes('پنجاب والڈ سٹی اتھارٹی'));
+ok('EE-1', 'Footer: independent non-profit disclosure', home.includes('آزاد، غیر منافع بخش'));
+ok('EE-2', 'Footer: authorities compared listed', home.includes('پنجاب والڈ سٹی اتھارٹی'));
 ok('EE-3', 'legal pages carry last-updated (ستمبر 2026)', ['raazdari', 'sharaait', 'cookies'].every((p) => read(`src/pages/${p}.astro`).includes('ستمبر 2026')));
-ok('EE-4', 'home Sources section lists 6 official references', count(read('src/pages/index.astro'), 'target="_blank" rel="noopener"') >= 7 && read('src/pages/index.astro').includes('معتبر حوالے'));
-ok('EE-5', 'photo-rights statement in Footer + IMAGE-CREDITS.md referenced', read('src/components/Footer.astro').includes('IMAGE-CREDITS.md') && fs.existsSync('IMAGE-CREDITS.md'));
+ok('EE-4', 'home Sources section lists 6 official references', count(home, 'target="_blank" rel="noopener"') >= 7 && home.includes('معتبر حوالے'));
+ok('EE-5', 'photo-rights statement in Footer + IMAGE-CREDITS.md referenced', home.includes('IMAGE-CREDITS.md') && fs.existsSync('IMAGE-CREDITS.md'));
 nf('EE-6', 'WebPage/dateModified JSON-LD not present (optional enhancement; legal pages expose ستمبر 2026)');
 
 // ---------- sitemap / robots ----------
@@ -173,40 +173,43 @@ let cjk = 0;
 for (const f of srcFiles.concat(htmlFiles)) { const t = read(f); cjk += (t.match(/[\u4e00-\u9fff]/g) || []).length; }
 if (cjk) no('LC-1', 'zero CJK characters in source+dist', cjk + ' hits');
 else ok('LC-1', 'zero CJK characters in source+dist', 'site is pure Urdu');
+const langOk = (t) => /<html lang="ur" dir="rtl">/.test(t) || /<html lang="en" dir="ltr">/.test(t);
 for (const f of htmlFiles) {
   const t = read(f);
-  const lang = /<html lang="ur" dir="rtl">/.test(t);
-  if (!lang) no('LC-2.' + f, 'html lang=ur dir=rtl', f);
+  if (!langOk(t)) no('LC-2.' + f, 'html lang/dir valid (ur rtl | en ltr)', f);
 }
-if (htmlFiles.every((f) => /<html lang="ur" dir="rtl">/.test(read(f)))) ok('LC-2', 'html lang=ur dir=rtl on every page', htmlFiles.length + ' pages');
+if (htmlFiles.every((f) => langOk(read(f)))) ok('LC-2', 'html lang/dir valid on every page (ur rtl | en ltr)', htmlFiles.length + ' pages');
 for (const w of ['Sule Pagoda', 'Tha Phae', 'jaipur', 'pompeii', 'bupest', 'placeholder', 'TODO', 'Lorem', 'FIXME', 'crystal']) {
   if (srcAll.includes(w)) no('LC-3', 'no leakage word: ' + w, 'found');
 }
 ok('LC-3', 'no cross-site leakage / placeholder words', 'clean');
-const h1s = htmlFiles.map((f) => [f, count(read(f), '<h1>')]);
+const h1s = htmlFiles.map((f) => [f, (read(f).match(/<h1[\s>]/g) || []).length]);
 for (const [f, n] of h1s) if (n !== 1) no('LC-4.' + f, 'single h1 per page', n + ' h1');
 if (h1s.every(([, n]) => n === 1)) ok('LC-4', 'single h1 per page', h1s.map(([f]) => { const b = path.basename(f); const d = path.basename(path.dirname(f)); if (b === '404.html') return '/404/'; return b === 'index.html' && d === 'dist' ? '/' : '/' + d + '/'; }).join(', '));
-const navNeed = ['تعارف', 'دورہ', 'سہولیات', 'موسم', 'نقشہ', 'سوالات'];
-const srcHome = read('src/pages/index.astro');
-const navIds = navNeed.every((a) => srcHome.includes('id="' + a + '"'));
-const navLinks = navNeed.every((a) => read('src/components/Header.astro').includes('#' + a));
-if (navIds && navLinks) ok('LC-5', 'header nav anchors map 1:1 to section ids', navNeed.join(', '));
-else no('LC-5', 'header nav anchors map 1:1 to section ids', 'navIds=' + navIds + ' navLinks=' + navLinks);
+const navNeedUR = ['تعارف', 'دورہ', 'سہولیات', 'موسم', 'نقشہ', 'سوالات'];
+const urNavOk = navNeedUR.every((a) => home.includes('id="' + a + '"') && home.includes('href="#' + a + '"'));
+if (urNavOk) ok('LC-5', 'header nav anchors map 1:1 to section ids (ur)', navNeedUR.join(', '));
+else no('LC-5', 'header nav anchors map 1:1 to section ids (ur)', 'mismatch in home');
+const enHome = fs.existsSync('dist/en/index.html') ? read('dist/en/index.html') : '';
+const navNeedEN = ['introduction', 'plan-visit', 'getting-there', 'facilities', 'routes', 'weather', 'map', 'faq'];
+const enNavOk = enHome !== '' && navNeedEN.every((a) => enHome.includes('id="' + a + '"') && enHome.includes('href="#' + a + '"'));
+if (enHome === '') nf('LC-5.en', 'English home not built yet');
+else if (enNavOk) ok('LC-5.en', 'header nav anchors map 1:1 to section ids (en)', navNeedEN.join(', '));
+else no('LC-5.en', 'header nav anchors map 1:1 to section ids (en)', 'mismatch in /en/ home');
 for (const [f, t] of [['dist/index.html', home]]) {
   if (!/<title>[^<]+<\/title>/.test(t)) no('LC-6', 'title present', f);
   if (!/<meta name="description" content="[^"]+">/.test(t)) no('LC-6', 'description present', f);
 }
 ok('LC-6', 'title + description on pages', 'present');
-ok('LC-7', 'weather uses Open-Meteo key coords + cache + Urdu weekdays', read('src/components/Weather.astro').includes('31.5883') && read('src/components/Weather.astro').includes('30 * 60 * 1000') && read('src/components/Weather.astro').includes("'اتوار'"));
+ok('LC-7', 'weather uses Open-Meteo key coords + cache + Urdu weekdays', read('src/lib/weather.ts').includes('31.5883') && read('src/lib/weather.ts').includes('30 * 60 * 1000') && read('src/lib/weather.ts').includes("'اتوار'"));
 
 // ---------- canonical / og ----------
 console.log('\n[CANONICAL & OG]');
 const pOf = (f) => {
-  const b = path.basename(f);
-  const d = path.basename(path.dirname(f));
-  if (b === '404.html') return '/404/';
-  if (b === 'index.html' && d === 'dist') return '/';
-  return '/' + d + '/';
+  let rel = path.relative(HTML_DIR, f).replace(/\\/g, '/');
+  rel = rel.replace(/index\.html$/, '').replace(/\.html$/, '/');
+  if (!rel.startsWith('/')) rel = '/' + rel;
+  return rel;
 };
 for (const f of htmlFiles) {
   const t = read(f);

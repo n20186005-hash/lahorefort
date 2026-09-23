@@ -1,0 +1,18 @@
+# Cloudflare Workers Static Assets — HTTP response headers
+# These apply to the deployed static site (manual `wrangler deploy`).
+
+# Security & transport hardening on all responses
+/*
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=()
+
+# Keep the service worker fresh so updates ship promptly
+/sw.js
+  Cache-Control: no-cache
+
+# Long cache for static assets (fingerprinted by Astro)
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable

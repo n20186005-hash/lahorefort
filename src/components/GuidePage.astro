@@ -1,0 +1,276 @@
+---
+interface Props { locale?: 'ur' | 'en'; }
+const { locale = 'ur' } = Astro.props;
+import { ui } from '../i18n';
+import {
+  ATTRACTION_FULL_NAME,
+  ATTRACTION_FULL_NAME_EN,
+  CITY_NAME,
+  STATE_PROVINCE,
+  COUNTRY_NAME,
+  STREET_ADDRESS,
+  STREET_ADDRESS_EN,
+  GEO_TEXT,
+  RATING_VALUE,
+  RATING_COUNT,
+  NEARBY_LANDMARKS,
+  NEARBY_LANDMARKS_EN,
+  MAPS_SHARE_URL,
+  MAPS_EMBED_SRC,
+  AUTHORITY_SOURCES,
+  AUTHORITY_SOURCES_EN
+} from '../data/site';
+import { buildJsonLd } from '../lib/schema';
+import TransportGuide from './sections/TransportGuide.astro';
+import FacilitiesGrid from './sections/FacilitiesGrid.astro';
+import AudienceRoutes from './sections/AudienceRoutes.astro';
+import VisitorResponsibility from './sections/VisitorResponsibility.astro';
+import Weather from './Weather.astro';
+import FaqSection from './sections/FaqSection.astro';
+
+const T = ui[locale];
+const landmarks = locale === 'en' ? NEARBY_LANDMARKS_EN : NEARBY_LANDMARKS;
+const landmarkSep = locale === 'en' ? ', ' : '، ';
+const sources = locale === 'en' ? AUTHORITY_SOURCES_EN : AUTHORITY_SOURCES;
+const heroName = locale === 'en' ? 'Lahore Fort' : ATTRACTION_FULL_NAME;
+const heroLatin = locale === 'en' ? ATTRACTION_FULL_NAME : 'Lahore Fort';
+const heroSub = locale === 'en' ? 'Lahore, Punjab, Pakistan' : `${CITY_NAME}، ${STATE_PROVINCE}، ${COUNTRY_NAME}`;
+const mapAddr = locale === 'en'
+  ? `Lahore Fort is located at ${STREET_ADDRESS_EN}; GPS coordinates: ${GEO_TEXT}.`
+  : `${ATTRACTION_FULL_NAME} (Lahore Fort) ${STREET_ADDRESS} میں واقع ہے؛ GPS نقاط: ${GEO_TEXT}۔`;
+---
+
+<Fragment>
+  <section class="hero" id={T.nav[0].id}>
+    <div class="hero-inner">
+      <span class="eyebrow">{T.hero.eyebrow}</span>
+      <h1>{heroName} <span class={locale === 'en' ? 'urdu' : 'latin'}>{heroLatin}</span></h1>
+      <p class="sub">{heroSub}</p>
+      <p class="lede">{T.hero.intro}</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href={`#${T.nav[1].id}`}>{T.hero.ctaPlan}</a>
+        <a class="btn btn-ghost" href={MAPS_SHARE_URL} target="_blank" rel="noopener" dir="ltr">{T.hero.ctaMap}</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="stats">
+    <div class="wrap stats-grid">
+      <div class="stat">
+        <div class="stat-num"><span dir="ltr">{RATING_VALUE}</span> / 5</div>
+        <div class="stat-label">{T.stats.ratingLabel}</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" dir="ltr">{RATING_COUNT.toLocaleString('en-US')}</div>
+        <div class="stat-label">{T.stats.reviewsLabel}</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" dir="ltr">1981</div>
+        <div class="stat-label">{T.stats.unescoLabel}</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" dir="ltr">21</div>
+        <div class="stat-label">{T.stats.partsLabel}</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">{T.intro.eyebrow}</span>
+        <h2>{T.intro.h2}</h2>
+        <p>{T.intro.p}</p>
+      </div>
+      <div class="cards">
+        {T.intro.cards.map((c) => (
+          <article class="card">
+            <h3>{c.title}</h3>
+            <p>{c.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section alt">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">{T.gallery.eyebrow}</span>
+        <h2>{T.gallery.h2}</h2>
+        <p>{T.gallery.p}</p>
+      </div>
+      <div class="gallery-grid">
+        {['alamgiri-gate', 'sheesh-mahal', 'naulakha-pavilion', 'picture-wall', 'lahore-fort-night'].map((img, i) => (
+          <figure>
+            <img src={`/images/${img}.jpg`} alt={T.gallery.alts[i]} loading="lazy" width="800" height="600" />
+            <figcaption>{T.gallery.captions[i]}</figcaption>
+          </figure>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">{T.buildings.eyebrow}</span>
+        <h2>{T.buildings.h2}</h2>
+        <p>{T.buildings.p}</p>
+      </div>
+      <div class="cards">
+        {T.buildings.cards.map((c) => (
+          <article class="card">
+            <h3>{c.title}</h3>
+            <p>{c.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section alt">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">{T.history.eyebrow}</span>
+        <h2>{T.history.h2}</h2>
+      </div>
+      <div class="timeline">
+        {T.history.timeline.map((t) => (
+          <article class="tl-item">
+            <h3>{t.title}</h3>
+            <p>{t.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">{T.stories.eyebrow}</span>
+        <h2>{T.stories.h2}</h2>
+        <p>{T.stories.p}</p>
+      </div>
+      <div class="cards">
+        {T.stories.items.map((s) => (
+          <article class="card">
+            <span class="badge badge-soft">{s.badge}</span>
+            <h3>{s.title}</h3>
+            <p>{s.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section alt" id={T.nav[1].id}>
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">{T.visit.eyebrow}</span>
+        <h2>{T.visit.h2}</h2>
+      </div>
+      <div class="cards">
+        {T.visit.cards.map((c) => (
+          <article class="card">
+            <h3>{c.title}</h3>
+            <p>{c.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <TransportGuide id={T.nav[2].id} locale={locale} />
+  <FacilitiesGrid id={T.nav[3].id} locale={locale} />
+  <AudienceRoutes id={T.nav[4].id} locale={locale} />
+  <Weather id={T.nav[5].id} locale={locale} />
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">{T.nearby.eyebrow}</span>
+        <h2>{T.nearby.h2}</h2>
+        <p>{T.nearby.nearbyPrefix}{landmarks.slice(0, 4).join(landmarkSep)}{T.nearby.nearbySuffix}</p>
+      </div>
+      <div class="cards">
+        {T.nearby.cards.map((c) => (
+          <article class="card">
+            <h3>{c.title}</h3>
+            <p>{c.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section alt">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">{T.food.eyebrow}</span>
+        <h2>{T.food.h2}</h2>
+        <p>{T.food.p}</p>
+      </div>
+      <div class="cards">
+        {T.food.cards.map((c) => (
+          <article class="card">
+            <h3>{c.title}</h3>
+            <p>{c.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id={T.nav[6].id}>
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">{T.map.eyebrow}</span>
+        <h2>{T.map.h2}</h2>
+        <p>{mapAddr}</p>
+        <p class="fine">
+          {T.map.fine}
+          <a href={sources[0].url} target="_blank" rel="noopener">{sources[0].name}</a>
+          {' · '}
+          <a href={sources[4].url} target="_blank" rel="noopener">{sources[4].name}</a>
+        </p>
+      </div>
+      <div class="map-embed">
+        <iframe
+          title={T.map.iframeTitle}
+          src={MAPS_EMBED_SRC}
+          width="100%"
+          height="450"
+          style="border:0"
+          loading="lazy"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allowfullscreen
+        ></iframe>
+      </div>
+    </div>
+  </section>
+
+  <VisitorResponsibility id={locale === 'en' ? 'responsibility' : 'ذمہ داری'} locale={locale} />
+
+  <FaqSection id={T.nav[7].id} locale={locale} />
+
+  <section class="section alt">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">{T.sources.eyebrow}</span>
+        <h2>{T.sources.h2}</h2>
+      </div>
+      <div class="src-grid">
+        {sources.map((s) => (
+          <a href={s.url} target="_blank" rel="noopener">{s.name}</a>
+        ))}
+      </div>
+      <p class="fine">{T.sources.fine}</p>
+    </div>
+  </section>
+
+  {buildJsonLd(locale).map((block) => (
+    <script type="application/ld+json" set:html={JSON.stringify(block)} />
+  ))}
+</Fragment>

@@ -1,0 +1,20 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { withSiteName } from '../../data/site';
+const locale = 'en' as const;
+const title = withSiteName(locale, 'Page not found');
+---
+
+<BaseLayout title={title} description="The requested page is not available." locale={locale} noindex={true}>
+  <section class="notfound">
+    <div class="wrap notfound-wrap">
+      <h1>404</h1>
+      <p>The page you are looking for could not be found.</p>
+      <a class="btn btn-primary" href="/en/">← Back to home</a>
+    </div>
+  </section>
+  <style>
+    .notfound { padding: 6rem 1rem; text-align: center; }
+    .notfound h1 { font-size: 4rem; color: var(--brand); margin: 0 0 0.5rem; }
+  </style>
+</BaseLayout>

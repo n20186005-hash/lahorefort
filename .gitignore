@@ -1,6 +1,33 @@
+# Dependencies
 node_modules/
+.pnpm-store/
+
+# Astro build / cache output
 dist/
 .astro/
+.output/
+
+# Cloudflare Workers deployment artifacts
 .wrangler/
+.mf/
+.open-next/
+
+# Environment & secrets
 .env
+.env.*
+.dev.vars
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Coverage output
+coverage/
+
+# OS / editor noise
 .DS_Store
+Thumbs.db
+desktop.ini

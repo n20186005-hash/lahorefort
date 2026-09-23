@@ -1,0 +1,26 @@
+---
+interface Props { id?: string; locale?: 'ur' | 'en'; }
+const { id, locale = 'ur' } = Astro.props;
+// Facilities are described by TYPE only — this guide does not recommend any
+// specific shop, hotel or business, keeping it neutral and non-commercial.
+import { ui } from '../../i18n';
+const T = ui[locale];
+const items = T.facilities.items;
+---
+
+<section class={id === T.nav[3].id ? 'alt' : ''} id={id ?? T.nav[3].id}>
+  <div class="section-head">
+    <span class="eyebrow">{T.facilities.eyebrow}</span>
+    <h2>{T.facilities.h2}</h2>
+    <p>{T.facilities.p}</p>
+  </div>
+  <div class="fac-grid">
+    {items.map((it) => (
+      <article class="fac-card">
+        <span class="badge">{it.badge}</span>
+        <h3>{it.title}</h3>
+        <p>{it.text}</p>
+      </article>
+    ))}
+  </div>
+</section>

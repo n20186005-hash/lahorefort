@@ -1,14 +1,28 @@
 ---
-const home = Astro.url.pathname === '/';
+interface Props { locale?: 'ur' | 'en'; }
+const { locale = 'ur' } = Astro.props;
+import { ui } from '../i18n';
+import { SITE_NAME, SITE_NAME_EN } from '../data/site';
+const T = ui[locale];
+const homeHref = locale === 'en' ? '/en/' : '/';
+const otherHref = locale === 'en' ? '/' : '/en/';
+const switchLabel = locale === 'en' ? 'اردو' : 'English';
+const brand = locale === 'en' ? SITE_NAME_EN : SITE_NAME;
 ---
+
 <header class="site-header">
-  <a class="brand" href="/" aria-label="قلعہ لاہور سیاحتی رہنما کا مرکزی صفحہ"><img src="/logo.svg" alt="قلعہ لاہور سیاحتی رہنما" width="250" height="70" /></a>
-  <nav aria-label="مرکزی نیویگیشن">
-    <a href={home ? '#تعارف' : '/#تعارف'}>تعارف</a>
-    <a href={home ? '#دورہ' : '/#دورہ'}>دورے کی منصوبہ بندی</a>
-    <a href={home ? '#سہولیات' : '/#سہولیات'}>سہولیات</a>
-    <a href={home ? '#موسم' : '/#موسم'}>موسم</a>
-    <a href={home ? '#نقشہ' : '/#نقشہ'}>نقشہ</a>
-    <a href={home ? '#سوالات' : '/#سوالات'}>عام سوالات</a>
-  </nav>
+  <div class="wrap header-inner">
+    <a class="brand" href={homeHref}>
+      <span class="brand-mark" aria-hidden="true">🏰</span>
+      <span class="brand-text">{brand}</span>
+    </a>
+    <input type="checkbox" id="navtoggle" class="nav-toggle" />
+    <label for="navtoggle" class="nav-toggle-label" aria-label="Menu"><span></span></label>
+    <nav class="site-nav" aria-label="Primary">
+      {T.nav.map((n) => (
+        <a href={`#${n.id}`}>{n.label}</a>
+      ))}
+      <a class="lang-switch" href={otherHref} hreflang={locale === 'en' ? 'ur' : 'en'}>{switchLabel}</a>
+    </nav>
+  </div>
 </header>

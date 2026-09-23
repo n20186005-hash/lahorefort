@@ -1,0 +1,38 @@
+---
+interface Props { id?: string; locale?: 'ur' | 'en'; }
+const { id, locale = 'ur' } = Astro.props;
+import { ui } from '../../i18n';
+const T = ui[locale];
+const routes = T.audience.routes;
+const itineraries = T.audience.itineraries;
+---
+
+<section id={id ?? T.nav[4].id}>
+  <div class="section-head">
+    <span class="eyebrow">{T.audience.eyebrow}</span>
+    <h2>{T.audience.h2}</h2>
+    <p>{T.audience.p}</p>
+  </div>
+  <div class="cards">
+    {routes.map((r) => (
+      <article class="card route-card">
+        <h3>{r.icon} {r.title}</h3>
+        <p>{r.text}</p>
+        <ul class="route-stops">
+          {r.stops.map((s) => <li>{s}</li>)}
+        </ul>
+      </article>
+    ))}
+  </div>
+  <div class="section-head" style="margin-top:2.5rem">
+    <h2>{T.audience.itineraryHead}</h2>
+  </div>
+  <div class="cards">
+    {itineraries.map((it) => (
+      <article class="card">
+        <h3>{it.title}</h3>
+        <p>{it.text}</p>
+      </article>
+    ))}
+  </div>
+</section>

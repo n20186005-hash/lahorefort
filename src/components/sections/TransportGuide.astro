@@ -1,0 +1,61 @@
+---
+interface Props { id?: string; locale?: 'ur' | 'en'; }
+const { id, locale = 'ur' } = Astro.props;
+import { ui } from '../../i18n';
+import {
+  STREET_ADDRESS,
+  STREET_ADDRESS_EN,
+  TELEPHONE_DISPLAY,
+  MAPS_SHARE_URL
+} from '../../data/site';
+const T = ui[locale];
+const addressText = locale === 'en' ? STREET_ADDRESS_EN : STREET_ADDRESS;
+---
+
+<section id={id ?? T.nav[2].id}>
+  <div class="section-head">
+    <span class="eyebrow">{T.transport.eyebrow}</span>
+    <h2>{T.transport.h2}</h2>
+    <p>{T.transport.p}</p>
+  </div>
+
+  <div class="facts">
+    <div>
+      {T.transport.blocks.slice(0, 2).map((b) => (
+        <h3>{b.h3}</h3>
+        <p>{b.p}</p>
+      ))}
+    </div>
+    <div>
+      {T.transport.blocks.slice(2, 4).map((b) => (
+        <h3>{b.h3}</h3>
+        <p>{b.p}</p>
+      ))}
+    </div>
+  </div>
+
+  <div class="facts">
+    <div>
+      {T.transport.blocks.slice(4, 5).map((b) => (
+        <h3>{b.h3}</h3>
+        <p>{b.p}</p>
+      ))}
+    </div>
+    <div>
+      {T.transport.blocks.slice(5, 6).map((b) => (
+        <h3>{b.h3}</h3>
+        <p>{b.p}</p>
+      ))}
+      <div class="notice">
+        <strong>{T.transport.noticeLabel}:</strong> {addressText}<br />
+        <strong>{locale === 'en' ? 'Phone:' : 'فون:'}</strong> <span dir="ltr">{TELEPHONE_DISPLAY}</span>
+      </div>
+    </div>
+  </div>
+
+  <p class="fine">
+    {T.transport.fine}
+    <a href={MAPS_SHARE_URL} target="_blank" rel="noopener" dir="ltr">{locale === 'en' ? 'Google Maps' : 'گوگل نقشہ'}</a>
+    {locale === 'en' ? ' or contact local traffic staff on site.' : ' یا مقامی ٹریفک کے عملے سے رابطہ کریں۔'}
+  </p>
+</section>

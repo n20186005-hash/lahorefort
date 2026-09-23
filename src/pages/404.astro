@@ -1,4 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { withSiteName } from '../data/site';
 ---
-<BaseLayout title="صفحہ نہیں ملا | قلعہ لاہور سیاحتی رہنما" description="درخواست کردہ صفحہ موجود نہیں۔" robots="noindex"><section class="legal"><h1>صفحہ نہیں ملا</h1><p>درخواست کردہ صفحہ دستیاب نہیں۔ <a href="/">مرکزی صفحے پر واپس جائیں</a>۔</p></section></BaseLayout>
+<BaseLayout title={withSiteName('ur', 'صفحہ نہیں ملا')} noindex={true} robots="noindex">
+<section class="legal"><h1>صفحہ نہیں ملا</h1><p>درخواست کردہ صفحہ دستیاب نہیں۔ <a href="/">مرکزی صفحے پر واپس جائیں</a>۔</p></section></BaseLayout>

@@ -1,0 +1,22 @@
+---
+interface Props { id?: string; locale?: 'ur' | 'en'; }
+const { id, locale = 'ur' } = Astro.props;
+import { ui } from '../../i18n';
+const T = ui[locale];
+const items = T.faq.items;
+---
+
+<section id={id ?? T.nav[7].id}>
+  <div class="section-head">
+    <span class="eyebrow">{T.faq.eyebrow}</span>
+    <h2>{T.faq.h2}</h2>
+  </div>
+  <div class="faq">
+    {items.map((item) => (
+      <details>
+        <summary>{item.question}</summary>
+        <p>{item.answer}</p>
+      </details>
+    ))}
+  </div>
+</section>

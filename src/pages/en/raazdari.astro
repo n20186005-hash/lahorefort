@@ -1,0 +1,61 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { withSiteName } from '../../data/site';
+const locale = 'en' as const;
+const title = withSiteName(locale, 'Privacy Policy');
+---
+
+<BaseLayout title={title} description="Privacy policy and minimal-data explanation for the Lahore Fort travel guide." locale={locale} noindex={true}>
+  <section class="legal">
+    <div class="wrap legal-wrap">
+      <h1>{title}</h1>
+      <p>
+        This privacy policy explains, in plain language, what little data this independent tourism guide
+        collects, why, and the choices available to you. We are a non-profit information project and do not
+        sell personal data.
+      </p>
+
+      <h2>What we do not collect</h2>
+      <p>
+        We do not require registration, do not run a comments system, and do not ask for your name, email
+        address or payment details in order to read this guide.
+      </p>
+
+      <h2>Analytics (only with your consent)</h2>
+      <p>
+        We use privacy-friendly analytics only after you grant consent through the cookie banner. Before
+        consent, no analytics script is loaded. Aggregated, anonymous data may include the page viewed,
+        approximate region and device type — never your identity.
+      </p>
+
+      <h2>Cookies</h2>
+      <p>
+        Essential cookies keep the site working, such as remembering your cookie choice. Analytics and
+        preference cookies are set only with your consent. You can change your choice at any time in
+        Cookie Settings.
+      </p>
+
+      <h2>External links</h2>
+      <p>
+        This guide links to official and third-party sites (government bodies, maps, image sources). We are
+        not responsible for their privacy practices; review their policies separately.
+      </p>
+
+      <h2>Children's privacy</h2>
+      <p>
+        The guide is general-audience and informational. We do not knowingly collect data from children.
+      </p>
+
+      <h2>Changes to this policy</h2>
+      <p>If the policy changes, we will update the effective date shown below.</p>
+
+      <h2>Contact</h2>
+      <p>
+        For privacy questions, use the project's public repository or contact channel listed in the footer.
+      </p>
+
+      <p class="fine">Effective: 2026-09-17</p>
+      <p><a class="btn btn-ghost" href="/en/">← Back to home</a></p>
+    </div>
+  </section>
+</BaseLayout>

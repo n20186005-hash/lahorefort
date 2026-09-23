@@ -1,0 +1,23 @@
+---
+interface Props { id?: string; locale?: 'ur' | 'en'; }
+const { id, locale = 'ur' } = Astro.props;
+import { ui } from '../../i18n';
+const T = ui[locale];
+const cards = T.responsibility.cards;
+---
+
+<section id={id ?? 'ذمہ داری'} class="alt">
+  <div class="section-head">
+    <span class="eyebrow">{T.responsibility.eyebrow}</span>
+    <h2>{T.responsibility.h2}</h2>
+    <p>{T.responsibility.p}</p>
+  </div>
+  <div class="cards">
+    {cards.map((c) => (
+      <article class="card">
+        <h3>{c.title}</h3>
+        <p>{c.text}</p>
+      </article>
+    ))}
+  </div>
+</section>

@@ -1,9 +1,54 @@
+---
+interface Props { locale?: 'ur' | 'en'; }
+const { locale = 'ur' } = Astro.props;
+import { ui } from '../i18n';
+import {
+  AUTHORITY_SOURCES,
+  AUTHORITY_SOURCES_EN,
+  MAPS_SHARE_URL,
+  TELEPHONE_DISPLAY
+} from '../data/site';
+const T = ui[locale];
+const sources = locale === 'en' ? AUTHORITY_SOURCES_EN : AUTHORITY_SOURCES;
+const legalBase = locale === 'en' ? '/en/' : '/';
+const helpNote =
+  locale === 'en'
+    ? 'For directions, parking or any other information, see the relevant sections above, open Google Maps, or contact the on-site visitor desk.'
+    : 'راستہ، پارکنگ یا کسی اور معلومات کے لیے اوپر دیے گئے متعلقہ سیکشن دیکھیں، گوگل نقشہ کھولیں، یا مقامی زائرین کی ڈیسک سے رابطہ کریں۔';
+---
+
 <footer class="site-footer">
-  <div class="footer-grid">
-    <div><h2>قلعہ لاہور سیاحتی رہنما</h2><p>یہ ویب سائٹ ایک آزاد، غیر منافع بخش سیاحتی معلوماتی رہنما منصوبہ ہے اور کسی سرکاری ادارے یا سرکاری تنظیم سے منسلک نہیں۔</p></div>
-    <div><h2>قانونی صفحات</h2><p><a href="/raazdari/">رازداری کی پالیسی</a> · <a href="/sharaait/">خدمت کی شرائط</a> · <a href="/cookies/">کوکی ترتیبات</a></p></div>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <h3>{T.meta.siteName}</h3>
+        <p class="muted">{T.footer.desc}</p>
+        <p class="muted small">{helpNote}</p>
+        <p class="muted small">
+          <a href={MAPS_SHARE_URL} target="_blank" rel="noopener" dir="ltr">Google Maps</a>
+          {' · '}
+          <a href={`tel:${TELEPHONE_DISPLAY}`} dir="ltr">{TELEPHONE_DISPLAY}</a>
+        </p>
+      </div>
+      <div>
+        <h4>{T.footer.legalLabel}</h4>
+        <ul class="footer-links">
+          <li><a href={`${legalBase}raazdari/`}>{T.meta.privacyTitle}</a></li>
+          <li><a href={`${legalBase}sharaait/`}>{T.meta.termsTitle}</a></li>
+          <li><a href={`${legalBase}cookies/`}>{T.meta.cookiesTitle}</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>{locale === 'en' ? 'Reference sources' : 'حوالہ جات'}</h4>
+        <ul class="src-list">
+          {sources.map((s) => (
+            <li><a href={s.url} target="_blank" rel="noopener">{s.name}</a></li>
+          ))}
+        </ul>
+      </div>
+    </div>
+    <p class="fine footer-fine">{T.footer.fine1}</p>
+    <p class="fine footer-fine">{T.footer.fine2}</p>
+    <p class="fine footer-fine">{T.footer.fine3} {T.meta.siteName}</p>
   </div>
-  <p class="fine">اس رہنما کی معلومات میٹروپولیٹن کارپوریشن لاہور، پنجاب والڈ سٹی اتھارٹی، ٹورازم ڈیولپمنٹ کارپوریشن آف پنجاب، پاکستان ٹورزم ڈیولپمنٹ کارپوریشن، محکمہ آثارِ قدیمہ و عجائب گھر پاکستان اور یونیسکو کے عوامی مواد سے تقابل کی گئی ہیں۔ اس میں کوئی تجارتی سفارش شامل نہیں۔</p>
-  <p class="fine">تصاویر کے حقوق ان کے اصل فوٹوگرافروں اور حقوق رکھنے والوں کے پاس محفوظ ہیں۔ تصویری کریڈٹ اور لائسنس کی تفصیل منصوبے کی فائل <span dir="ltr">IMAGE-CREDITS.md</span> میں موجود ہے۔</p>
-  <p class="fine">© 2026 قلعہ لاہور سیاحتی رہنما۔ جملہ حقوق محفوظ ہیں۔</p>
 </footer>

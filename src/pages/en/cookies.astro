@@ -1,0 +1,50 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { withSiteName } from '../../data/site';
+const locale = 'en' as const;
+const title = withSiteName(locale, 'Cookie Settings');
+---
+
+<BaseLayout title={title} description="Manage essential, analytics, preferences and marketing cookie choices." locale={locale} noindex={true}>
+  <section class="legal">
+    <div class="wrap legal-wrap">
+      <h1>{title}</h1>
+      <p class="eyebrow">Last updated: September 2026</p>
+      <p>
+        Manage your cookie preferences below. Essential technical storage is required for the site to function
+        and to remember your consent choice; it cannot be turned off. Other categories load only after you grant
+        consent through this page.
+      </p>
+      <div class="cookie-grid">
+        <label class="cookie-row">
+          <span><strong>Essential cookies / local storage</strong><br/>Required for basic site function and to remember your consent preference; cannot be disabled.</span>
+          <input type="checkbox" checked disabled />
+        </label>
+        <label class="cookie-row">
+          <span><strong>Analytics cookies</strong><br/>Google Analytics <span dir="ltr">G-HXM22WWPKP</span> loads only after permission and helps understand overall usage.</span>
+          <input id="analytics" type="checkbox" />
+        </label>
+        <label class="cookie-row">
+          <span><strong>Preference storage</strong><br/>Remembers optional display or user preferences for future visits.</span>
+          <input id="preferences" type="checkbox" />
+        </label>
+        <label class="cookie-row">
+          <span><strong>Marketing cookies</strong><br/>This guide does not currently run personalised ads; kept off by default as a forward-looking option.</span>
+          <input id="marketing" type="checkbox" disabled />
+        </label>
+      </div>
+      <div class="cookie-actions">
+        <button class="save" id="save">Save preferences</button>
+        <button class="reject" id="reject">Reject all non-essential</button>
+      </div>
+      <p id="status" role="status" aria-live="polite"></p>
+
+      <h2>Managing consent</h2>
+      <p>You can change these settings at any time. After disabling analytics consent, Google Analytics will not load on the next page view. Data already sent to third parties remains subject to their respective policies.</p>
+      <p><a class="btn btn-ghost" href="/en/">← Back to home</a></p>
+    </div>
+  </section>
+  <script is:inline>
+    const key='lahoreFortConsent';const a=document.getElementById('analytics');const p=document.getElementById('preferences');const s=document.getElementById('status');try{const v=JSON.parse(localStorage.getItem(key)||'{}');a.checked=v.analytics===true;p.checked=v.preferences===true}catch(e){}document.getElementById('save').addEventListener('click',()=>{localStorage.setItem(key,JSON.stringify({necessary:true,analytics:a.checked,preferences:p.checked,marketing:false}));s.textContent='Your preferences have been saved. Reopen the page for the change to take full effect.'});document.getElementById('reject').addEventListener('click',()=>{a.checked=false;p.checked=false;localStorage.setItem(key,JSON.stringify({necessary:true,analytics:false,preferences:false,marketing:false}));s.textContent='All non-essential options have been turned off.'});
+  </script>
+</BaseLayout>

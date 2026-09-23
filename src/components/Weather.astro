@@ -1,92 +1,236 @@
-<!-- Weather panel: current conditions + 7-day forecast from the free
-     Open-Meteo API (no key, non-profit friendly). The site is fully static
-     (Cloudflare Static Assets), so data is fetched in the browser and cached
-     locally for 30 minutes; a fallback message is shown on failure.
-     Coordinates: Lahore Fort (31.5883, 74.3129). -->
-<div class="wx" id="wx-root" dir="rtl">
-  <div class="wx-now wx-loading" id="wx-now"><span>موسم کی معلومات لوڈ ہو رہی ہیں…</span></div>
-  <div class="wx-days" id="wx-days" aria-live="polite"></div>
-  <p class="fine">اعداد و شمار مفت خدمت <a href="https://open-meteo.com/" target="_blank" rel="noopener" dir="ltr">open-meteo.com</a> سے فی الوقت حاصل ہوتے ہیں؛ درجۂ حرارت ڈگری سینٹی گریڈ میں ہے اور پیش گوئی وقت کے ساتھ بدل سکتی ہے۔</p>
-</div>
-<script is:inline>
-(function () {
-  var LAT = 31.5883;
-  var LON = 74.3129;
-  var KEY = 'lahoreFortWeatherV1';
-  var URL = 'https://api.open-meteo.com/v1/forecast?latitude=' + LAT + '&longitude=' + LON +
-    '&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m' +
-    '&daily=weather_code,temperature_2m_max,temperature_2m_min' +
-    '&timezone=Asia%2FKarachi&forecast_days=7';
-  var FD = '۰۱۲۳۴۵۶۷۸۹';
-  var WD = ['اتوار', 'پیر', 'منگل', 'بدھ', 'جمعرات', 'جمعہ', 'ہفتہ'];
-  var W = {
-    '0': 'صاف', '1': 'زیادہ تر صاف', '2': 'جزوی ابر آلود', '3': 'ابر آلود',
-    '45': 'دھند', '48': 'برفانی دھند',
-    '51': 'ہلکی بوندا باندی', '53': 'بوندا باندی', '55': 'تیز بوندا باندی',
-    '56': 'جمتی ہلکی بوندا باندی', '57': 'جمتی تیز بوندا باندی',
-    '61': 'ہلکی بارش', '63': 'بارش', '65': 'تیز بارش',
-    '66': 'جمتی ہلکی بارش', '67': 'جمتی تیز بارش',
-    '71': 'ہلکی برفباری', '73': 'برفباری', '75': 'تیز برفباری', '77': 'برف کے دانے',
-    '80': 'ہلکی بارش کے جھلکے', '81': 'بارش کے جھلکے', '82': 'تیز بارش کے جھلکے',
-    '85': 'برفانی جھلکے', '86': 'تیز برفانی جھلکے',
-    '95': 'گرج چمک', '96': 'گرج چمک کے ساتھ ژالہ', '99': 'شدید گرج چمک اور ژالہ'
-  };
-  function fa(n) { return String(n).replace(/\d/g, function (d) { return FD[+d]; }); }
-  function r0(x) { return Math.round(x); }
-  function wdesc(c) { return W[c] || 'مختلف موسم'; }
-  function weekdayOf(iso) {
-    var p = String(iso).split('-');
-    if (p.length < 3) { return ''; }
-    return WD[new Date(Date.UTC(+p[0], +p[1] - 1, +p[2])).getUTCDay()];
-  }
-  function render(d) {
-    var now = document.getElementById('wx-now');
-    var days = document.getElementById('wx-days');
-    if (!now || !days || !d || !d.current || !d.daily) { return fail(); }
-    var c = d.current;
-    now.className = 'wx-now';
-    now.innerHTML =
-      '<span class="wx-temp">' + fa(r0(c.temperature_2m)) + '°C</span>' +
-      '<div class="wx-meta"><strong>' + wdesc(c.weather_code) + '</strong>' +
-      '<span>محسوس: ' + fa(r0(c.apparent_temperature)) + '°C • نمی: ' + fa(r0(c.relative_humidity_2m)) + '٪</span>' +
-      '<span>ہوا: ' + fa(r0(c.wind_speed_10m)) + ' کلومیٹر فی گھنٹہ</span></div>';
-    var t = d.daily.time || [];
-    var wc = d.daily.weather_code || [];
-    var mx = d.daily.temperature_2m_max || [];
-    var mn = d.daily.temperature_2m_min || [];
-    var html = '';
-    for (var i = 0; i < t.length; i++) {
-      var label = i === 0 ? 'آج' : (i === 1 ? 'کل' : weekdayOf(t[i]));
-      html += '<div class="wx-day"><span class="d">' + label + '</span>' +
-        '<span class="wdesc">' + wdesc(wc[i]) + '</span>' +
-        '<span class="hi">' + fa(r0(mx[i])) + '°</span> <span class="lo">' + fa(r0(mn[i])) + '°</span></div>';
+---
+interface Props { id?: string; locale?: 'ur' | 'en'; }
+const { id, locale = 'ur' } = Astro.props;
+import { ui } from '../i18n';
+import {
+  getWeather,
+  wmoLabel,
+  beaufort,
+  uvLabel,
+  dayName,
+  buildAdvice,
+  digitFormat
+} from '../lib/weather';
+const T = ui[locale];
+
+// Build-time snapshot (static site). The client script refreshes it on the fly
+// if a weather endpoint is available; otherwise the snapshot stays as-is.
+const wx = (await getWeather()) as any;
+const cur: any = wx?.current ?? {};
+const daily: any = wx?.daily ?? {};
+const fc = wx
+  ? (daily?.time ?? []).slice(0, 7).map((iso: string, i: number) => ({
+      day: dayName(i, iso, locale),
+      code: daily.weather_code?.[i],
+      tmax: daily.temperature_2m_max?.[i],
+      tmin: daily.temperature_2m_min?.[i],
+      pop: daily.precipitation_probability_max?.[i],
+      uv: daily.uv_index_max?.[i]
+    }))
+  : [];
+const adv = wx
+  ? buildAdvice(
+      cur,
+      {
+        precipitation_probability_max: daily.precipitation_probability_max?.[0],
+        uv_index_max: daily.uv_index_max?.[0],
+        temperature_2m_max: daily.temperature_2m_max?.[0]
+      },
+      locale
+    )
+  : null;
+const feelLabel = locale === 'en' ? 'Feels like' : 'محسوس';
+const humLabel = locale === 'en' ? 'Humidity' : 'نمی';
+const windLabel = locale === 'en' ? 'Wind' : 'ہوا';
+const popLabel = locale === 'en' ? 'Rain chance' : 'بارش کا امکان';
+---
+
+<section id={id ?? T.nav[5].id}>
+  <div class="section-head">
+    <span class="eyebrow">{T.weather.eyebrow}</span>
+    <h2>{T.weather.h2}</h2>
+    <p>{T.weather.p}</p>
+  </div>
+  <div class="weather-panel" id="weather-panel" data-locale={locale}>
+    {
+      wx ? (
+        <>
+          <div class="current">
+            <div class="c-main">
+              <div class="c-temp">
+                {digitFormat(Math.round(cur.temperature_2m ?? 0), locale)}
+                <span>°C</span>
+              </div>
+              <div class="c-cond">{wmoLabel(cur.weather_code, locale)}</div>
+              <div class="c-sub">
+                {T.weather.adviceTitle}: {adv?.notes?.[0] ?? ''}
+              </div>
+            </div>
+            <div class="c-meta">
+              <div>
+                <span>{feelLabel}</span> {digitFormat(Math.round(cur.apparent_temperature ?? 0), locale)}°C
+              </div>
+              <div>
+                <span>{humLabel}</span> {digitFormat(cur.relative_humidity_2m ?? 0, locale)}%
+              </div>
+              <div>
+                <span>{windLabel}</span> {digitFormat(Math.round(cur.wind_speed_10m ?? 0), locale)} km/h{' '}
+                {beaufort(cur.wind_speed_10m ?? 0, locale).label}
+              </div>
+              <div>
+                <span>{popLabel}</span> {digitFormat(fc[0]?.pop ?? 0, locale)}%
+              </div>
+            </div>
+          </div>
+
+          <h3>{T.weather.adviceTitle}</h3>
+          <div class="advice">
+            {adv?.notes?.map((n: string) => (
+              <p>{n}</p>
+            ))}
+          </div>
+
+          <div class="forecast">
+            {fc.map((f: any) => (
+              <div class="f-day">
+                <div class="f-name">{f.day}</div>
+                <div class="f-cond">{wmoLabel(f.code, locale)}</div>
+                <div class="f-temp">
+                  {digitFormat(Math.round(f.tmax ?? 0), locale)}° / {digitFormat(Math.round(f.tmin ?? 0), locale)}°
+                </div>
+                <div class="f-pop">💧 {digitFormat(f.pop ?? 0, locale)}%</div>
+                <div class="f-uv">☀️ {digitFormat(Math.round(f.uv ?? 0), locale)} {uvLabel(f.uv ?? 0, locale)}</div>
+              </div>
+            ))}
+          </div>
+
+          <p class="fine">{T.weather.footer}</p>
+        </>
+      ) : (
+        <p class="fine">{T.weather.nowUnavailable}</p>
+      )
     }
-    days.innerHTML = html;
-  }
-  function fail() {
-    var now = document.getElementById('wx-now');
-    var days = document.getElementById('wx-days');
-    if (now) {
-      now.className = 'wx-now';
-      now.innerHTML = '<span class="wx-error">اس وقت موسم کی معلومات دستیاب نہیں ہیں۔ براہِ کرم تھوڑی دیر بعد دوبارہ کوشش کریں یا مقامی موسمی اطلاع دیکھیں۔</span>';
-    }
-    if (days) { days.innerHTML = ''; }
-  }
-  try {
-    var raw = localStorage.getItem(KEY);
-    if (raw) {
-      var cache = JSON.parse(raw);
-      if (cache && cache.ts && cache.data && Date.now() - cache.ts < 30 * 60 * 1000) {
-        render(cache.data);
-        return;
+  </div>
+</section>
+
+{/* // cache TTL: 30 * 60 * 1000 — refresh window for the build-time snapshot */}
+<script is:inline define_global={true}>
+  (function () {
+    var panel = document.getElementById('weather-panel');
+    if (!panel) return;
+    var locale = panel.getAttribute('data-locale') === 'en' ? 'en' : 'ur';
+    var WMO = {
+      ur: {
+        '0': 'صاف', '1': 'زیادہ تر صاف', '2': 'جزوی ابر آلود', '3': 'ابر آلود', '45': 'دھند', '48': 'برفانی دھند',
+        '51': 'ہلکی بوندا باندی', '53': 'بوندا باندی', '55': 'تیز بوندا باندی', '56': 'جمتی ہلکی بوندا باندی', '57': 'جمتی تیز بوندا باندی',
+        '61': 'ہلکی بارش', '63': 'بارش', '65': 'تیز بارش', '66': 'جمتی ہلکی بارش', '67': 'جمتی تیز بارش',
+        '71': 'ہلکی برفباری', '73': 'برفباری', '75': 'تیز برفباری', '77': 'برف کے دانے',
+        '80': 'ہلکی بارش کے جھلکے', '81': 'بارش کے جھلکے', '82': 'تیز بارش کے جھلکے', '85': 'برفانی جھلکے', '86': 'تیز برفانی جھلکے',
+        '95': 'گرج چمک', '96': 'گرج چمک کے ساتھ ژالہ', '99': 'شدید گرج چمک اور ژالہ'
+      },
+      en: {
+        '0': 'Clear', '1': 'Mainly clear', '2': 'Partly cloudy', '3': 'Overcast', '45': 'Fog', '48': 'Rime fog',
+        '51': 'Light drizzle', '53': 'Drizzle', '55': 'Dense drizzle', '56': 'Light freezing drizzle', '57': 'Dense freezing drizzle',
+        '61': 'Light rain', '63': 'Rain', '65': 'Heavy rain', '66': 'Light freezing rain', '67': 'Heavy freezing rain',
+        '71': 'Light snow', '73': 'Snow', '75': 'Heavy snow', '77': 'Snow grains',
+        '80': 'Light rain showers', '81': 'Rain showers', '82': 'Violent rain showers', '85': 'Snow showers', '86': 'Heavy snow showers',
+        '95': 'Thunderstorm', '96': 'Thunderstorm with hail', '99': 'Severe thunderstorm with hail'
       }
+    };
+    var WD = {
+      ur: ['اتوار', 'پیر', 'منگل', 'بدھ', 'جمعرات', 'جمعہ', 'ہفتہ'],
+      en: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+    };
+    var DAY = { ur: ['آج', 'کل'], en: ['Today', 'Tomorrow'] };
+    var RAIN = [51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82, 85, 86, 95, 96, 99];
+    var URI = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+    function fmt(n) { return locale === 'ur' ? String(n == null ? '' : n).replace(/\d/g, function (d) { return URI[+d] || d; }) : String(n == null ? '' : n); }
+    function wmo(c) { return WMO[locale][String(c)] || (locale === 'en' ? 'Variable weather' : 'مختلف موسم'); }
+    function beaufort(kmh) {
+      var k = Number(kmh) || 0, t = (locale === 'en'
+        ? [[1, 'Light air'], [6, 'Light breeze'], [12, 'Gentle breeze'], [20, 'Moderate breeze'], [29, 'Fresh breeze'], [39, 'Strong breeze'], [50, 'Near gale'], [62, 'Gale'], [75, 'Storm'], [89, 'Violent storm'], [1000, 'Hurricane']]
+        : [[1, 'ہلکی ہوا'], [6, 'ہوا'], [12, 'ہوا'], [20, 'نرم ہوا'], [29, 'معتدل ہوا'], [39, 'تیز ہوا'], [50, 'طاقتور ہوا'], [62, 'طوفانی ہوا'], [75, 'طوفان'], [89, 'شدید طوفان'], [1000, 'ہولناک طوفان']]);
+      var lv = 0; for (var i = 0; i < t.length; i++) { if (k >= t[i][0]) lv = i; }
+      return { level: lv, label: t[lv][1] };
     }
-  } catch (e) { /* ignore storage errors */ }
-  fetch(URL).then(function (r) { if (!r.ok) { throw new Error('http'); } return r.json(); })
-    .then(function (data) {
-      try { localStorage.setItem(KEY, JSON.stringify({ ts: Date.now(), data: data })); } catch (e) { /* ignore */ }
-      render(data);
-    })
-    .catch(fail);
-})();
+    function uvLabel(u) {
+      u = Number(u) || 0;
+      if (locale === 'en') return u < 3 ? 'Low' : u < 6 ? 'Moderate' : u < 8 ? 'High' : u < 11 ? 'Very High' : 'Extreme';
+      return u < 3 ? 'کم' : u < 6 ? 'درمیانہ' : u < 8 ? 'زیادہ' : u < 11 ? 'بہت زیادہ' : 'انتہائی';
+    }
+    function advice(cur, today) {
+      var notes = [], umb = false;
+      var code = Number(cur && cur.weather_code || 0);
+      var pop = Number(today && today.precipitation_probability_max || 0);
+      if (RAIN.indexOf(code) >= 0 || pop >= 40) {
+        umb = true;
+        notes.push(locale === 'en' ? 'Rain is likely — carry an umbrella or light raincoat and take care on stone stairs.' : 'بارش کا امکان ہے — چھتری یا ہلکا بارشی کوٹ ساتھ رکھیں اور پتھریلی سیڑھیوں پر احتیاط کریں۔');
+      }
+      var uv = Number(today && today.uv_index_max || 0);
+      if (uv >= 6) notes.push(locale === 'en' ? 'High UV today (index ' + Math.round(uv) + ') — use a hat, sunglasses and sunscreen.' : 'آج بالائے بنفشی شعاعیں زیادہ (شدت ' + fmt(Math.round(uv)) + ') — ٹوپی، عینک اور سن اسکرین استعمال کریں۔');
+      var w = Number(cur && cur.wind_speed_10m || 0), bl = beaufort(w);
+      if (bl.level >= 6) notes.push(locale === 'en' ? 'Strong wind (' + bl.label + ') — keep balance in open areas.' : 'ہوا تیز (' + bl.label + ') — کھلے حصوں میں توازن برقرار رکھیں۔');
+      var tm = Number(today && today.temperature_2m_max || 0);
+      if (tm >= 38) notes.push(locale === 'en' ? 'High temperature — carry a water bottle and seek shade during the midday peak.' : 'درجۂ حرارت زیادہ — پانی کی بوتل ساتھ رکھیں اور دوپہر کے شدید حصے میں سائے کا سہارا لیں۔');
+      else if (tm <= 15) notes.push(locale === 'en' ? 'Cool weather — bring warm clothing and a light jacket.' : 'موسم ٹھنڈا — گرم لباس اور ہلکی جیکٹ رکھیں۔');
+      else notes.push(locale === 'en' ? 'Mild weather — normal tourist clothing is fine.' : 'موسم معتدل — عام سیاحتی لباس مناسب ہے۔');
+      if (!notes.length) notes.push(locale === 'en' ? 'Weather is favourable — pick your visiting time.' : 'موسم سازگار ہے — دورے کا وقت منتخب کریں۔');
+      return { umbrella: umb, notes: notes };
+    }
+    function esc(s) { return String(s == null ? '' : s); }
+    function render(wx) {
+      var cur = wx.current || {}, d = wx.daily || {};
+      var fc = (d.time || []).slice(0, 7).map(function (iso, i) {
+        var wd = WD[locale][new Date(iso + 'T00:00:00Z').getUTCDay()];
+        return {
+          day: i === 0 ? DAY[locale][0] : i === 1 ? DAY[locale][1] : wd,
+          code: d.weather_code && d.weather_code[i],
+          tmax: d.temperature_2m_max && d.temperature_2m_max[i],
+          tmin: d.temperature_2m_min && d.temperature_2m_min[i],
+          pop: d.precipitation_probability_max && d.precipitation_probability_max[i],
+          uv: d.uv_index_max && d.uv_index_max[i]
+        };
+      });
+      var adv = advice(cur, { precipitation_probability_max: d.precipitation_probability_max && d.precipitation_probability_max[0], uv_index_max: d.uv_index_max && d.uv_index_max[0], temperature_2m_max: d.temperature_2m_max && d.temperature_2m_max[0] });
+      var html = '';
+      html += '<div class="current"><div class="c-main">';
+      html += '<div class="c-temp">' + fmt(Math.round(cur.temperature_2m || 0)) + '<span>°C</span></div>';
+      html += '<div class="c-cond">' + esc(wmo(cur.weather_code)) + '</div>';
+      html += '<div class="c-sub">' + esc(DAY_LABEL_ADVICE) + ': ' + esc(adv.notes[0] || '') + '</div></div>';
+      html += '<div class="c-meta">';
+      html += '<div><span>' + FEEL + '</span> ' + fmt(Math.round(cur.apparent_temperature || 0)) + '°C</div>';
+      html += '<div><span>' + HUM + '</span> ' + fmt(cur.relative_humidity_2m || 0) + '%</div>';
+      html += '<div><span>' + WIND + '</span> ' + fmt(Math.round(cur.wind_speed_10m || 0)) + ' km/h ' + esc(beaufort(cur.wind_speed_10m || 0).label) + '</div>';
+      html += '<div><span>' + POP + '</span> ' + fmt(fc[0] && fc[0].pop || 0) + '%</div>';
+      html += '</div></div>';
+      html += '<h3>' + ADVICE_T + '</h3><div class="advice">';
+      adv.notes.forEach(function (n) { html += '<p>' + esc(n) + '</p>'; });
+      html += '</div><div class="forecast">';
+      fc.forEach(function (f) {
+        html += '<div class="f-day"><div class="f-name">' + esc(f.day) + '</div>';
+        html += '<div class="f-cond">' + esc(wmo(f.code)) + '</div>';
+        html += '<div class="f-temp">' + fmt(Math.round(f.tmax || 0)) + '° / ' + fmt(Math.round(f.tmin || 0)) + '°</div>';
+        html += '<div class="f-pop">💧 ' + fmt(f.pop || 0) + '%</div>';
+        html += '<div class="f-uv">☀️ ' + fmt(Math.round(f.uv || 0)) + ' ' + esc(uvLabel(f.uv || 0)) + '</div></div>';
+      });
+      html += '</div><p class="fine">' + FOOT + '</p>';
+      panel.innerHTML = html;
+    }
+    var FEEL = locale === 'en' ? 'Feels like' : 'محسوس';
+    var HUM = locale === 'en' ? 'Humidity' : 'نمی';
+    var WIND = locale === 'en' ? 'Wind' : 'ہوا';
+    var POP = locale === 'en' ? 'Rain chance' : 'بارش کا امکان';
+    var ADVICE_T = locale === 'en' ? 'Travel advice' : 'سفری مشورہ';
+    var DAY_LABEL_ADVICE = ADVICE_T;
+    var FOOT = locale === 'en'
+      ? 'The weather forecast is taken from an independent meteorological data service; temperatures are in degrees Celsius and the forecast may change over time.'
+      : 'موسم کی پیش گوئی ایک آزاد موسمیاتی ڈیٹا خدمت سے لی گئی ہے؛ درجۂ حرارت ڈگری سینٹی گریڈ میں ہے اور پیش گوئی وقت کے ساتھ بدل سکتی ہے۔';
+    (async function () {
+      try {
+        var r = await fetch('/api/weather');
+        if (!r.ok) return;
+        render(await r.json());
+      } catch (e) { /* keep build-time snapshot */ }
+    })();
+  })();
 </script>

@@ -1,0 +1,39 @@
+---
+interface Props { id?: string; locale?: 'ur' | 'en'; }
+const { id, locale = 'ur' } = Astro.props;
+import { ui } from '../../i18n';
+const T = ui[locale];
+const seasons = T.seasonal.seasons;
+---
+
+<section id={id ?? 'موسمیات'} class="alt">
+  <div class="section-head">
+    <span class="eyebrow">{T.seasonal.eyebrow}</span>
+    <h2>{T.seasonal.h2}</h2>
+    <p>{T.seasonal.p}</p>
+  </div>
+  <div class="table-wrap">
+    <table class="season-table">
+      <thead>
+        <tr>{T.seasonal.tableHeads.map((h) => <th>{h}</th>)}</tr>
+      </thead>
+      <tbody>
+        {seasons.map((s) => (
+          <tr>
+            <td data-label={T.seasonal.tableHeads[0]}>{s.name}</td>
+            <td data-label={T.seasonal.tableHeads[1]}>{s.temp}</td>
+            <td data-label={T.seasonal.tableHeads[2]}>{s.cond}</td>
+            <td data-label={T.seasonal.tableHeads[3]}>{s.tip}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <p class="fine">
+    {T.seasonal.fine}
+    {locale === 'en'
+      ? <a href="#weather">in the weather section above</a>
+      : <a href="#موسم">اوپر والے موسم والے سیکشن</a>}
+    .
+  </p>
+</section>

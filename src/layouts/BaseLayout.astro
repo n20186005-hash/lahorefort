@@ -1,47 +1,74 @@
 ---
-import '../styles/global.css';
-import Header from '../components/Header.astro';
-import Footer from '../components/Footer.astro';
-interface Props { title: string; description: string; image?: string; imageAlt?: string; schema?: unknown[]; robots?: string; }
-const { title, description, image='/images/alamgiri-gate.jpg', imageAlt='قلعہ لاہور (Lahore Fort) کا تاریخی عالمگیری دروازہ — اندرون شہر لاہور، پنجاب، پاکستان', schema=[], robots='index' } = Astro.props;
-const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined;
-const ogImage = Astro.site ? new URL(image, Astro.site).href : undefined;
-const robotsMeta = robots === 'noindex' ? 'noindex,follow' : 'index,follow,max-image-preview:large';
+interface Props {
+  title?: string;
+  description?: string;
+  noindex?: boolean;
+  locale?: 'ur' | 'en';
+}
+const { title, description, noindex = false, locale = 'ur' } = Astro.props;
+import { ui } from '../i18n';
+import { SITE_NAME, SITE_NAME_EN, GA4_ID, HERO_IMAGE_ALT } from '../data/site';
+const T = ui[locale];
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const desc = description ?? T.meta.homeDesc;
+const siteName = locale === 'en' ? SITE_NAME_EN : SITE_NAME;
+
+// Build hreflang alternates for the current page pair: /<path> (ur) and /en/<path> (en).
+const pathname = Astro.url.pathname;
+const isEn = pathname.startsWith('/en/') || pathname === '/en';
+const base = isEn ? pathname.replace(/^\/en/, '') || '/' : pathname;
+const urHref = new URL(base === '/' ? '/' : base, Astro.site).href;
+const enHref = new URL('/en' + (base === '/' ? '/' : base), Astro.site).href;
 ---
+
 <!doctype html>
-<html lang="ur" dir="rtl">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>{title}</title>
-  <meta name="description" content={description} />
-  <meta name="robots" content={robotsMeta} />
-  <meta name="theme-color" content="#6d281d" />
-  <link rel="manifest" href="/manifest.webmanifest" />
-  {canonical && <link rel="canonical" href={canonical} />}
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-  <link rel="icon" href="/favicon-32x32.png" sizes="32x32" />
-  <link rel="icon" href="/favicon-16x16.png" sizes="16x16" />
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
-  <meta property="og:type" content="website" />
-  <meta property="og:locale" content="ur_PK" />
-  <meta property="og:title" content={title} />
-  <meta property="og:description" content={description} />
-  {canonical && <meta property="og:url" content={canonical} />}
-  {ogImage && <meta property="og:image" content={ogImage} />}
-  {ogImage && <meta property="og:image:alt" content={imageAlt} />}
-  {schema.map((item) => <script type="application/ld+json" is:inline set:html={JSON.stringify(item)} />)}
-  <script is:inline>
-    (()=>{try{const p=JSON.parse(localStorage.getItem('lahoreFortConsent')||'{}');if(p.analytics===true){const s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id=G-HXM22WWPKP';document.head.appendChild(s);window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments)};gtag('js',new Date());gtag('config','G-HXM22WWPKP',{anonymize_ip:true});}}catch(e){}})();
-    if('serviceWorker' in navigator && location.protocol==='https:'){
-      addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){})});
-    }
-  </script>
-</head>
-<body>
-  <a class="skip" href="#مرکزی-مواد">مرکزی مواد پر جائیں</a>
-  <Header />
-  <main id="مرکزی-مواد"><slot /></main>
-  <Footer />
-</body>
+<html lang={T.htmlLang} dir={T.htmlDir}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title ?? siteName}</title>
+    <meta name="description" content={desc} />
+    <meta name="theme-color" content="#6d281d" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="preconnect" href="https://www.google.com" />
+    <link rel="preconnect" href="https://www.googletagmanager.com" />
+    {canonical && <link rel="canonical" href={canonical} />}
+    {canonical && <link rel="alternate" hreflang="x-default" href={urHref} />}
+    {canonical && <link rel="alternate" hreflang="ur-PK" href={urHref} />}
+    {canonical && <link rel="alternate" hreflang="en" href={enHref} />}
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:title" content={title ?? siteName} />
+    <meta property="og:description" content={desc} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={new URL('/images/alamgiri-gate.jpg', Astro.site).href} />
+    <meta property="og:image:alt" content={locale === 'en' ? 'Lahore Fort — the historic Alamgiri Gate' : HERO_IMAGE_ALT} />
+    <meta property="og:locale" content={locale === 'en' ? 'en_US' : 'ur_PK'} />
+    <meta name="twitter:card" content="summary_large_image" />
+    {noindex && <meta name="robots" content="noindex" />}
+    <slot name="head" />
+  </head>
+  <body>
+    <slot />
+    {GA4_ID && (
+      <script is:inline define:vars={{ GA4_ID }} define_global={true}>
+        (function () {
+          var allowed = false;
+          try {
+            var c = JSON.parse(localStorage.getItem('lahoreFortConsent') || '{}');
+            allowed = c && c.analytics === true;
+          } catch (e) {}
+          if (!allowed) return;
+          var s = document.createElement('script');
+          s.async = true;
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA4_ID;
+          document.head.appendChild(s);
+          window.dataLayer = window.dataLayer || [];
+          function gtag() { dataLayer.push(arguments); }
+          gtag('js', new Date());
+          gtag('config', GA4_ID, { anonymize_ip: true });
+        })();
+      </script>
+    )}
+  </body>
 </html>
