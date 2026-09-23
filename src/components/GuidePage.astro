@@ -27,6 +27,7 @@ import AudienceRoutes from './sections/AudienceRoutes.astro';
 import VisitorResponsibility from './sections/VisitorResponsibility.astro';
 import Weather from './Weather.astro';
 import FaqSection from './sections/FaqSection.astro';
+import SeasonalStrategy from './sections/SeasonalStrategy.astro';
 
 const T = ui[locale];
 const landmarks = locale === 'en' ? NEARBY_LANDMARKS_EN : NEARBY_LANDMARKS;
@@ -186,6 +187,7 @@ const mapAddr = locale === 'en'
   <FacilitiesGrid id={T.nav[3].id} locale={locale} />
   <AudienceRoutes id={T.nav[4].id} locale={locale} />
   <Weather id={T.nav[5].id} locale={locale} />
+  <SeasonalStrategy id={locale === 'en' ? 'seasonal' : 'موسمیات'} locale={locale} />
 
   <section class="section">
     <div class="wrap">
