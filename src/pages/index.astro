@@ -1,7 +1,5 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Header from '../components/Header.astro';
-import Footer from '../components/Footer.astro';
 import GuidePage from '../components/GuidePage.astro';
 import { ui } from '../i18n';
 const locale = 'ur' as const;
@@ -9,9 +7,5 @@ const T = ui[locale];
 ---
 
 <BaseLayout title={T.meta.homeTitle} description={T.meta.homeDesc} locale={locale}>
-  <Header locale={locale} />
-  <main>
-    <GuidePage locale={locale} />
-  </main>
-  <Footer locale={locale} />
+  <GuidePage locale={locale} />
 </BaseLayout>

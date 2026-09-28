@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { withSiteName } from '../data/site';
+import { withSiteName, DESCRIPTIONS } from '../data/site';
 ---
-<BaseLayout title={withSiteName('ur', 'صفحہ نہیں ملا')} noindex={true} robots="noindex">
+<BaseLayout title={withSiteName('ur', 'صفحہ نہیں ملا')} description={DESCRIPTIONS.notFound} noindex={true}>
 <section class="legal"><h1>صفحہ نہیں ملا</h1><p>درخواست کردہ صفحہ دستیاب نہیں۔ <a href="/">مرکزی صفحے پر واپس جائیں</a>۔</p></section></BaseLayout>
