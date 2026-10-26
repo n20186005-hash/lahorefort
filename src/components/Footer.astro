@@ -13,8 +13,8 @@ const sources = locale === 'en' ? AUTHORITY_SOURCES_EN : AUTHORITY_SOURCES;
 const legalBase = locale === 'en' ? '/en/' : '/';
 const helpNote =
   locale === 'en'
-    ? 'For directions, parking or any other information, see the relevant sections above, open Google Maps, or contact the on-site visitor desk.'
-    : 'راستہ، پارکنگ یا کسی اور معلومات کے لیے اوپر دیے گئے متعلقہ سیکشن دیکھیں، گوگل نقشہ کھولیں، یا مقامی زائرین کی ڈیسک سے رابطہ کریں۔';
+    ? 'Independent nonprofit editorial guide; not the operator, WCLA or UNESCO. Sources checked 25 October 2026. Confirm access with the operator before travelling.'
+    : 'آزاد، غیر منافع بخش ادارتی رہنما؛ قلعے کے منتظم، والڈ سٹی اتھارٹی یا یونیسکو سے وابستہ نہیں۔ ماخذ 25 اکتوبر 2026 کو دیکھے گئے؛ سفر سے پہلے رسائی کی تصدیق کریں۔';
 ---
 
 <footer class="site-footer">
@@ -27,12 +27,13 @@ const helpNote =
         <p class="muted small">
           <a href={MAPS_SHARE_URL} target="_blank" rel="noopener" dir="ltr">Google Maps</a>
           {' · '}
-          <a href={`tel:${TELEPHONE_DISPLAY}`} dir="ltr">{TELEPHONE_DISPLAY}</a>
+          <span>{locale==='en'?'Maps-listed number (operator not verified): ':'نقشے پر درج نمبر (منتظم کی تصدیق نہیں): '}<bdi dir="ltr">{TELEPHONE_DISPLAY}</bdi></span>
         </p>
       </div>
       <div>
         <h4>{T.footer.legalLabel}</h4>
         <ul class="footer-links">
+          <li><a href="/CREDITS.txt">{locale==='en'?'Photograph credits and licences':'تصاویر کے مصنف اور اجازت نامے'}</a></li>
           <li><a href={`${legalBase}raazdari/`}>{T.meta.privacyTitle}</a></li>
           <li><a href={`${legalBase}sharaait/`}>{T.meta.termsTitle}</a></li>
           <li><a href={`${legalBase}cookies/`}>{T.meta.cookiesTitle}</a></li>

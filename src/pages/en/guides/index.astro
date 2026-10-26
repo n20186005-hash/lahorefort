@@ -1,0 +1,9 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import {guides,guidePath} from '../../../data/guides';
+const en=true;
+const items=guides.filter(g=>g.english);
+---
+<BaseLayout locale="en" title={en?'Lahore Fort visitor guides and planning':'قلعہ لاہور: سیر، عمارتیں اور آس پاس کے تفصیلی رہنما'} description={en?'Independent guides to visiting Lahore Fort: hours, admission, routes, access and historical context.':'قلعہ لاہور کے اوقات، ٹکٹ، راستے، مغل عمارتیں، حفاظتِ ورثہ اور قریبی تاریخی مقامات کے ماخذ پر مبنی رہنما۔'}>
+<div class="wrap guide-article"><h1>{en?'Lahore Fort guides':'قلعہ لاہور کے تفصیلی رہنما'}</h1><p class="lead">{en?'Plan a visit or explore a particular question. Detailed monument guides are also available in Urdu.':'سیر کی تیاری، قلعے کی کسی مخصوص عمارت یا قریبی تاریخی مقام کے لیے الگ رہنما منتخب کریں۔ یہ آزاد، غیر منافع بخش معلومات ہیں، منتظم کی بکنگ خدمت نہیں۔'}</p><div class="guide-grid">{items.map(g=><article class="card"><h2><a href={guidePath(g.slug,en?'en':'ur')}>{en?g.english!.title:g.title}</a></h2><p>{en?g.english!.description:g.description}</p></article>)}</div>{en&&<p><a href="/guides/" lang="ur-PK">تمام اردو رہنما</a></p>}</div>
+</BaseLayout>

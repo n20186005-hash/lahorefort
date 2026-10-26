@@ -16,3 +16,6 @@
 # Long cache for static assets (fingerprinted by Astro)
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
+
+/CREDITS.txt
+  Content-Type: text/plain; charset=utf-8

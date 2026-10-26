@@ -15,7 +15,7 @@ const items = T.faq.items;
     {items.map((item) => (
       <details>
         <summary>{item.question}</summary>
-        <p>{item.answer}</p>
+        <p>{item.answer.split(/(31\.5882737, 74\.3154525)/).map(part=>part==='31.5882737, 74.3154525'?<bdi dir="ltr">{part}</bdi>:part)}</p>
       </details>
     ))}
   </div>

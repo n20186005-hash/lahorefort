@@ -9,7 +9,7 @@ const title = withSiteName(locale, 'Cookie Settings');
   <section class="legal">
     <div class="wrap legal-wrap">
       <h1>{title}</h1>
-      <p class="eyebrow">Last updated: September 2026</p>
+      <p class="eyebrow">Last updated: 25 October 2026</p>
       <p>
         Manage your cookie preferences below. Essential technical storage is required for the site to function
         and to remember your consent choice; it cannot be turned off. Other categories load only after you grant
@@ -25,7 +25,7 @@ const title = withSiteName(locale, 'Cookie Settings');
           <input id="analytics" type="checkbox" />
         </label>
         <label class="cookie-row">
-          <span><strong>Preference storage</strong><br/>Remembers optional display or user preferences for future visits.</span>
+          <span><strong>Preference storage</strong><br/>Records this choice without automatically restoring a theme or language. The URL determines the language.</span>
           <input id="preferences" type="checkbox" />
         </label>
         <label class="cookie-row">
@@ -40,11 +40,11 @@ const title = withSiteName(locale, 'Cookie Settings');
       <p id="status" role="status" aria-live="polite"></p>
 
       <h2>Managing consent</h2>
-      <p>You can change these settings at any time. After disabling analytics consent, Google Analytics will not load on the next page view. Data already sent to third parties remains subject to their respective policies.</p>
+      <p>You can change these settings at any time. A successfully saved allowance may load Google Analytics immediately. Withdrawal turns it off on this page immediately; a failed save message explains the remaining risk for future pages. Data already sent to third parties remains subject to their respective policies.</p>
       <p><a class="btn btn-ghost" href="/en/">← Back to home</a></p>
     </div>
   </section>
-  <script is:inline>
-    const key='lahoreFortConsent';const a=document.getElementById('analytics');const p=document.getElementById('preferences');const s=document.getElementById('status');try{const v=JSON.parse(localStorage.getItem(key)||'{}');a.checked=v.analytics===true;p.checked=v.preferences===true}catch(e){}document.getElementById('save').addEventListener('click',()=>{localStorage.setItem(key,JSON.stringify({necessary:true,analytics:a.checked,preferences:p.checked,marketing:false}));s.textContent='Your preferences have been saved. Reopen the page for the change to take full effect.'});document.getElementById('reject').addEventListener('click',()=>{a.checked=false;p.checked=false;localStorage.setItem(key,JSON.stringify({necessary:true,analytics:false,preferences:false,marketing:false}));s.textContent='All non-essential options have been turned off.'});
-  </script>
+    <script is:inline>
+ document.addEventListener('DOMContentLoaded',()=>{const api=window.lahoreAnalytics,a=document.getElementById('analytics'),p=document.getElementById('preferences'),s=document.getElementById('status');if(!api||!a||!p||!s)return;a.checked=api.get();try{p.checked=JSON.parse(localStorage.getItem('lahoreFortConsent')||'{}').preferences===true;}catch{}const save=allow=>{const r=api.set(allow,p.checked);a.checked=r.effective;s.textContent=r.saved?"Your choice is saved. Allowing analytics can load it immediately; withdrawal stops future measurement but cannot recall earlier data.":(r.sharedOff?"Analytics is off on this page and shared refusal is confirmed; the requested settings could not be saved.":"Analytics is off on this page. Saving failed; another page or future visit may read an older choice. Try again or clear this site’s stored choice.");};document.getElementById('save')?.addEventListener('click',()=>save(a.checked));document.getElementById('reject')?.addEventListener('click',()=>{p.checked=false;save(false);});});
+ </script>
 </BaseLayout>

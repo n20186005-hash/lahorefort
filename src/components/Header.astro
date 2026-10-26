@@ -1,11 +1,11 @@
 ---
-interface Props { locale?: 'ur' | 'en'; }
-const { locale = 'ur' } = Astro.props;
+interface Props { locale?: 'ur' | 'en'; otherHref?: string; }
+const { locale = 'ur', otherHref: pairedHref } = Astro.props;
 import { ui } from '../i18n';
 import { SITE_NAME, SITE_NAME_EN } from '../data/site';
 const T = ui[locale];
 const homeHref = locale === 'en' ? '/en/' : '/';
-const otherHref = locale === 'en' ? '/' : '/en/';
+const otherHref = pairedHref ?? (locale === 'en' ? '/' : '/en/');
 const switchLabel = locale === 'en' ? 'اردو' : 'English';
 const brand = locale === 'en' ? SITE_NAME_EN : SITE_NAME;
 ---
@@ -20,8 +20,9 @@ const brand = locale === 'en' ? SITE_NAME_EN : SITE_NAME;
     <label for="navtoggle" class="nav-toggle-label" aria-label="Menu"><span></span></label>
     <nav class="site-nav" aria-label="Primary">
       {T.nav.map((n) => (
-        <a href={`#${n.id}`}>{n.label}</a>
+        <a href={`${homeHref}#${n.id}`}>{n.label}</a>
       ))}
+      <a href={locale==='en'?'/en/guides/':'/guides/'}>{locale==='en'?'Guides':'تفصیلی رہنما'}</a>
       <a class="lang-switch" href={otherHref} hreflang={locale === 'en' ? 'ur' : 'en'}>{switchLabel}</a>
     </nav>
   </div>

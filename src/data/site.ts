@@ -34,25 +34,24 @@ export const STREET_ADDRESS = 'H8Q7+56P، فورٹ روڈ، اندرون شہر 
 export const STREET_ADDRESS_EN =
   'Fort Road, Walled City of Lahore, Lahore, Punjab, Pakistan';
 
-export const LATITUDE = 31.588273674183135;
-export const LONGITUDE = 74.31287757729703;
-export const GEO_TEXT = '31.5882737, 74.3128776';
+export const LATITUDE = 31.5882737;
+export const LONGITUDE = 74.3154525;
+export const GEO_TEXT = '31.5882737, 74.3154525';
 
 export const TELEPHONE = '+92-42-99204196';
 export const TELEPHONE_DISPLAY = '+92 42 99204196';
 
 export const MAPS_SHARE_URL = 'https://maps.app.goo.gl/new9CMHfA9H4XSZH6';
-export const MAPS_EMBED_SRC =
-  'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d6045.018717305006!2d74.31287757729703!3d31.588273674183135!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39191b622e82346f%3A0x35bdc71e324cb4ec!2z5ouJ5ZCI5bCU5aCh!5e1!3m2!1szh-CN!2s!4v1788420833647!5m2!1szh-CN!2s';
+export const MAPS_EMBED_SRC = 'https://www.google.com/maps?q=31.5882737,74.3154525&output=embed';
 
 /** Google listing snapshot (indicative, changes over time). */
 export const RATING_VALUE = 4.6;
-export const RATING_COUNT = 26406;
+export const RATING_COUNT = 26453;
 export const RATING_BEST = 5;
 
 export const OPENING_OPENS = '09:00';
-export const OPENING_CLOSES = '18:00';
-export const OPENING_HOURS_TEXT = '9 بجے صبح سے 6 بجے شام تک';
+export const OPENING_CLOSES = '17:00';
+export const OPENING_HOURS_TEXT = 'نقشے پر 09:00–17:00؛ منتظم: صبح 08:00 سے غروب سے آدھا گھنٹہ پہلے — پہلے تصدیق کریں';
 
 export const HERO_IMAGE = '/images/alamgiri-gate.jpg';
 export const HERO_IMAGE_ALT =

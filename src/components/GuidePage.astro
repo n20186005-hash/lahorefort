@@ -4,7 +4,6 @@ const { locale = 'ur' } = Astro.props;
 import { ui } from '../i18n';
 import {
   ATTRACTION_FULL_NAME,
-  ATTRACTION_FULL_NAME_EN,
   CITY_NAME,
   STATE_PROVINCE,
   COUNTRY_NAME,
@@ -58,8 +57,8 @@ const mapAddr = locale === 'en'
   <section class="stats">
     <div class="wrap stats-grid">
       <div class="stat">
-        <div class="stat-num"><span dir="ltr">{RATING_VALUE}</span> / 5</div>
-        <div class="stat-label">{T.stats.ratingLabel}</div>
+        <div class="stat-num"><bdi dir="ltr">{RATING_VALUE} / 5</bdi></div>
+        <div class="stat-label">{T.stats.ratingLabel} · Google Maps · <bdi dir="ltr">2026-10-25</bdi></div>
       </div>
       <div class="stat">
         <div class="stat-num" dir="ltr">{RATING_COUNT.toLocaleString('en-US')}</div>
@@ -101,11 +100,12 @@ const mapAddr = locale === 'en'
         <h2>{T.gallery.h2}</h2>
         <p>{T.gallery.p}</p>
       </div>
+      <p><a href={locale==='en'?'/en/guides/':'/guides/'}>{locale==='en'?'Read the detailed visitor guides':'سیر اور عمارتوں کے تفصیلی رہنما پڑھیں'}</a></p>
       <div class="gallery-grid">
         {['alamgiri-gate', 'sheesh-mahal', 'naulakha-pavilion', 'picture-wall', 'lahore-fort-night'].map((img, i) => (
           <figure>
             <img src={`/images/${img}.jpg`} alt={T.gallery.alts[i]} loading="lazy" width="800" height="600" />
-            <figcaption>{T.gallery.captions[i]}</figcaption>
+            <figcaption>{T.gallery.captions[i]} — {["Ansub263 · CC BY-SA 4.0","Faiza Badar Abbasi · CC BY-SA 4.0","Jawad.hassan89 · CC BY-SA 3.0","Muhammad Haider Sajjad · CC BY-SA 4.0","drfyzee · CC BY-SA 4.0"][i]} · <a href="/CREDITS.txt">{locale==='en'?'Source and licence':'ماخذ اور اجازت'}</a></figcaption>
           </figure>
         ))}
       </div>
@@ -230,7 +230,7 @@ const mapAddr = locale === 'en'
       <div class="section-head">
         <span class="eyebrow">{T.map.eyebrow}</span>
         <h2>{T.map.h2}</h2>
-        <p>{mapAddr}</p>
+        <p>{mapAddr.split(GEO_TEXT)[0]}<bdi dir="ltr">{GEO_TEXT}</bdi>{mapAddr.split(GEO_TEXT)[1]}</p>
         <p class="fine">
           {T.map.fine}
           <a href={sources[0].url} target="_blank" rel="noopener">{sources[0].name}</a>
@@ -273,6 +273,6 @@ const mapAddr = locale === 'en'
   </section>
 
   {buildJsonLd(locale).map((block) => (
-    <script type="application/ld+json" set:html={JSON.stringify(block)} />
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(block)} />
   ))}
 </Fragment>

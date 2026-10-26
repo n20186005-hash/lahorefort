@@ -3,7 +3,7 @@ import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { ui } from '../i18n';
-import { SITE_NAME, SITE_NAME_EN, GA4_ID, HERO_IMAGE_ALT } from '../data/site';
+import { SITE_NAME, SITE_NAME_EN, HERO_IMAGE_ALT } from '../data/site';
 
 interface Crumb {
   name: string;
@@ -16,9 +16,10 @@ interface Props {
   noindex?: boolean;
   locale?: 'ur' | 'en';
   crumbs?: Crumb[];
+  alternates?: {ur:string;en?:string};
 }
 
-const { title, description, noindex = false, locale = 'ur', crumbs } = Astro.props;
+const { title, description, noindex = false, locale = 'ur', crumbs, alternates } = Astro.props;
 const T = ui[locale];
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 const desc = description ?? T.meta.homeDesc;
@@ -30,12 +31,12 @@ const homeLabel = locale === 'en' ? 'Home' : 'مرکزی صفحہ';
 const pathname = Astro.url.pathname;
 const isEn = pathname.startsWith('/en/') || pathname === '/en';
 const base = isEn ? pathname.replace(/^\/en/, '') || '/' : pathname;
-const urHref = new URL(base === '/' ? '/' : base, Astro.site).href;
-const enHref = new URL('/en' + (base === '/' ? '/' : base), Astro.site).href;
+const urHref = new URL(alternates?.ur ?? (base === '/' ? '/' : base), Astro.site).href;
+const enHref = alternates && !alternates.en ? undefined : new URL(alternates?.en ?? ('/en' + (base === '/' ? '/' : base)), Astro.site).href;
 ---
 
 <!doctype html>
-<html lang={T.htmlLang} dir={T.htmlDir}>
+<html lang={locale === 'en' ? 'en' : 'ur-PK'} dir={T.htmlDir}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -44,11 +45,10 @@ const enHref = new URL('/en' + (base === '/' ? '/' : base), Astro.site).href;
     <meta name="theme-color" content="#6d281d" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="preconnect" href="https://www.google.com" />
-    <link rel="preconnect" href="https://www.googletagmanager.com" />
     {canonical && <link rel="canonical" href={canonical} />}
     {canonical && <link rel="alternate" hreflang="x-default" href={urHref} />}
     {canonical && <link rel="alternate" hreflang="ur-PK" href={urHref} />}
-    {canonical && <link rel="alternate" hreflang="en" href={enHref} />}
+    {enHref && <link rel="alternate" hreflang="en" href={enHref} />}
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={siteName} />
     <meta property="og:title" content={title ?? siteName} />
@@ -62,7 +62,8 @@ const enHref = new URL('/en' + (base === '/' ? '/' : base), Astro.site).href;
     <slot name="head" />
   </head>
   <body>
-    <Header locale={locale} />
+    <a class="skip-link" href="#main-content">{locale==='en'?'Skip to content':'متن پر جائیں'}</a>
+    <Header locale={locale} otherHref={locale==='en'?new URL(urHref).pathname:enHref?new URL(enHref).pathname:'/en/guides/'} />
     {
       crumbs && crumbs.length > 0 && (
         <nav class="crumbs" aria-label={locale === 'en' ? 'Breadcrumb' : 'روٹ'}>
@@ -79,29 +80,10 @@ const enHref = new URL('/en' + (base === '/' ? '/' : base), Astro.site).href;
         </nav>
       )
     }
-    <main>
+    <main id="main-content">
       <slot />
     </main>
     <Footer locale={locale} />
-    {GA4_ID && (
-      <script is:inline define:vars={{ GA4_ID }} define_global={true}>
-        (function () {
-          var allowed = false;
-          try {
-            var c = JSON.parse(localStorage.getItem('lahoreFortConsent') || '{}');
-            allowed = c && c.analytics === true;
-          } catch (e) {}
-          if (!allowed) return;
-          var s = document.createElement('script');
-          s.async = true;
-          s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA4_ID;
-          document.head.appendChild(s);
-          window.dataLayer = window.dataLayer || [];
-          function gtag() { dataLayer.push(arguments); }
-          gtag('js', new Date());
-          gtag('config', GA4_ID, { anonymize_ip: true });
-        })();
-      </script>
-    )}
+    <script is:inline src="/analytics.js"></script>
   </body>
 </html>

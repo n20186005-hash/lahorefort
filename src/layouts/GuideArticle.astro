@@ -1,0 +1,25 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import {guides,guidePath,type Guide} from '../data/guides';
+interface Props {guide:Guide;locale?:'ur'|'en'}
+const {guide,locale='ur'}=Astro.props;
+const en=locale==='en';
+const original=guides.find(g=>g.slug===guide.slug)!;
+const related=guide.related.map(s=>guides.find(g=>g.slug===s)).filter(Boolean).map(g=>({href:guidePath(g!.slug,en&&g!.english?'en':'ur'),title:en?(g!.english?.title??g!.title):g!.title}));
+const alternates=original.english?{ur:guidePath(guide.slug),en:guidePath(guide.slug,'en')}:{ur:guidePath(guide.slug)};
+const canonical=new URL(guidePath(guide.slug,locale),Astro.site).href;
+const dimensions:Record<string,[number,number]>={'/images/alamgiri-gate.jpg':[3248,1828],'/images/sheesh-mahal.jpg':[780,975],'/images/naulakha-pavilion.jpg':[4036,2268],'/images/picture-wall.jpg':[1152,1536],'/images/lahore-fort-night.jpg':[638,960]};
+const size=guide.image?dimensions[guide.image.path]:undefined;
+const schema={'@context':'https://schema.org','@type':'Article',headline:guide.title,description:guide.description,inLanguage:en?'en':'ur-PK',mainEntityOfPage:canonical,author:{'@type':'Organization',name:en?'Lahore Fort independent guide editorial team':'قلعہ لاہور آزاد رہنما کی ادارتی ٹیم'},citation:guide.sources.map(s=>s.url)};
+---
+<BaseLayout locale={locale} title={`${guide.title} | ${en?'Lahore Fort guide':'قلعہ لاہور رہنما'}`} description={guide.description} alternates={alternates} crumbs={[{name:en?'Guides':'تفصیلی رہنما',href:en?'/en/guides/':'/guides/'},{name:guide.title}]}>
+<script slot="head" type="application/ld+json" is:inline set:html={JSON.stringify(schema).replace(/</g,'\u003c')}/>
+<article class="wrap guide-article">
+<header><p class="eyebrow">{en?'Independent nonprofit visitor guide':'آزاد، غیر منافع بخش سیاحتی رہنما'}</p><h1>{guide.title}</h1><p class="lead">{guide.summary}</p></header>
+{guide.image&&<figure><img src={guide.image.path} alt={guide.image.alt} width={size?.[0]} height={size?.[1]} loading="lazy"/><figcaption>{guide.image.caption} <a href="/CREDITS.txt">{en?'Image credits':'تصویر کا انتساب'}</a></figcaption></figure>}
+<nav class="article-contents" aria-label={en?'On this page':'اس صفحے پر'}><ul>{guide.sections.map((s,i)=><li><a href={`#part-${i+1}`}>{s.heading}</a></li>)}</ul></nav>
+{guide.sections.map((s,i)=><section id={`part-${i+1}`}><h2>{s.heading}</h2>{s.paragraphs.map(p=><p>{p}</p>)}{s.bullets&&<ul>{s.bullets.map(x=><li>{x}</li>)}</ul>}</section>)}
+<aside class="source-box"><h2>{en?'Sources and editorial responsibility':'ماخذ اور ادارتی ذمہ داری'}</h2><p>{en?'Prepared by this independent nonprofit guide’s editorial team. We are not the fort operator, WCLA or UNESCO. Published information and access can change; confirm arrangements with the relevant operator before travelling.':'یہ تحریر اس آزاد، غیر منافع بخش رہنما کی ادارتی ٹیم نے مرتب کی ہے۔ ہم قلعے کے منتظم، والڈ سٹی اتھارٹی یا یونیسکو نہیں ہیں۔ شائع معلومات اور رسائی بدل سکتی ہے؛ سفر سے پہلے متعلقہ منتظم سے تصدیق کریں۔'}</p><ul>{guide.sources.map(s=><li><a href={s.url} rel="noopener">{s.title}</a> — {en?'checked':'دیکھا گیا'} <bdi dir="ltr">{s.checked}</bdi></li>)}</ul></aside>
+<nav aria-label={en?'Related guides':'متعلقہ رہنما'}><h2>{en?'Continue reading':'مزید مطالعہ'}</h2><ul>{related.map(x=><li><a href={x.href}>{x.title}</a></li>)}</ul><a href={en?'/en/guides/':'/guides/'}>{en?'All guides':'تمام رہنما'}</a></nav>
+</article>
+</BaseLayout>

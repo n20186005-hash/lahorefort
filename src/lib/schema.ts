@@ -12,11 +12,6 @@ import {
   LATITUDE,
   LONGITUDE,
   MAPS_SHARE_URL,
-  TELEPHONE,
-  RATING_VALUE,
-  RATING_COUNT,
-  BREADCRUMB_TRAIL,
-  BREADCRUMB_TRAIL_EN
 } from '../data/site';
 
 const SAME_AS = [
@@ -40,7 +35,7 @@ function attractionSchema(locale: Locale) {
     description: ui[locale].meta.homeDesc,
     image: [`${SITE}/images/alamgiri-gate.jpg`],
     isAccessibleForFree: false,
-    url: `${SITE}/`,
+    url: `${SITE}/${locale==='en'?'en/':''}`,
     address: {
       '@type': 'PostalAddress',
       streetAddress: STREET_ADDRESS,
@@ -50,13 +45,7 @@ function attractionSchema(locale: Locale) {
     },
     geo: { '@type': 'GeoCoordinates', latitude: LATITUDE, longitude: LONGITUDE },
     hasMap: MAPS_SHARE_URL,
-    telephone: TELEPHONE,
-    sameAs: SAME_AS,
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: RATING_VALUE,
-      reviewCount: RATING_COUNT
-    }
+    sameAs: SAME_AS
   };
 }
 
@@ -72,19 +61,6 @@ function faqSchema(locale: Locale) {
   };
 }
 
-function breadcrumbSchema(locale: Locale) {
-  const trail = locale === 'en' ? BREADCRUMB_TRAIL_EN : BREADCRUMB_TRAIL;
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: trail.map((label, i) => ({
-      '@type': 'ListItem',
-      position: i + 1,
-      name: label,
-      item: `${SITE}/${i === 0 ? '' : ''}`
-    }))
-  };
-}
 
 export function buildJsonLd(locale: Locale = 'ur') {
   return [
@@ -96,7 +72,6 @@ export function buildJsonLd(locale: Locale = 'ur') {
       inLanguage: locale === 'en' ? 'en' : 'ur'
     },
     attractionSchema(locale),
-    breadcrumbSchema(locale),
     faqSchema(locale)
   ];
 }

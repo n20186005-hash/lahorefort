@@ -1,7 +1,7 @@
 /* Lahore Fort guide — offline-first service worker.
-   Navigation requests: network first, fall back to cached home page.
+   Navigation requests: network first, fall back to the same cached page or an unavailable response.
    Same-origin static assets: cache first with background refresh. */
-const CACHE = 'lahorefort-v1';
+const CACHE = 'lahorefort-v2026-10-25';
 const CORE = [
   '/',
   '/manifest.webmanifest',
@@ -29,17 +29,17 @@ self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
-  if (url.origin !== self.location.origin) return;
+  if (url.origin !== self.location.origin || url.pathname.startsWith('/api/')) return;
 
   if (req.mode === 'navigate') {
     event.respondWith(
       fetch(req)
         .then((res) => {
           const copy = res.clone();
-          caches.open(CACHE).then((cache) => cache.put('/', copy)).catch(() => {});
+          if(res.status===200)caches.open(CACHE).then((cache) => cache.put(req, copy)).catch(() => {});
           return res;
         })
-        .catch(() => caches.match('/').then((hit) => hit || caches.match(req)))
+        .catch(() => caches.match(req).then((hit) => hit || new Response('Offline — reconnect to open this page.',{status:503,headers:{'content-type':'text/plain; charset=utf-8'}})))
     );
     return;
   }
